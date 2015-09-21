@@ -344,6 +344,7 @@
 		08B8E52D1B78F6B9003084C3 /* YMShowImageView.m in Sources */ = {isa = PBXBuildFile; fileRef = 08B8E5111B78F6B9003084C3 /* YMShowImageView.m */; };
 		08B8E52E1B78F6B9003084C3 /* YMTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 08B8E5131B78F6B9003084C3 /* YMTableViewCell.m */; };
 		08B8E52F1B78F6B9003084C3 /* YMTapGestureRecongnizer.m in Sources */ = {isa = PBXBuildFile; fileRef = 08B8E5151B78F6B9003084C3 /* YMTapGestureRecongnizer.m */; };
+		08BE519E1BAFB08300B1A8ED /* GiveGiftAlertView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 08BE519D1BAFB08300B1A8ED /* GiveGiftAlertView.xib */; };
 		08D22B551BA0113600062F0E /* ApiXml.mm in Sources */ = {isa = PBXBuildFile; fileRef = 08D22B4C1BA0113600062F0E /* ApiXml.mm */; settings = {COMPILER_FLAGS = "-fno-objc-arc"; }; };
 		08D22B561BA0113600062F0E /* payRequsestHandler.mm in Sources */ = {isa = PBXBuildFile; fileRef = 08D22B4E1BA0113600062F0E /* payRequsestHandler.mm */; };
 		08D22B571BA0113600062F0E /* WXUtil.mm in Sources */ = {isa = PBXBuildFile; fileRef = 08D22B501BA0113600062F0E /* WXUtil.mm */; };
@@ -459,7 +460,6 @@
 		08FDD0B81B9E7B7B0097313A /* rank2.png in Resources */ = {isa = PBXBuildFile; fileRef = 08FDD0B51B9E7B7B0097313A /* rank2.png */; };
 		08FDD0B91B9E7B7B0097313A /* rank3.png in Resources */ = {isa = PBXBuildFile; fileRef = 08FDD0B61B9E7B7B0097313A /* rank3.png */; };
 		08FDD0BD1B9E93900097313A /* GiveGiftAlertView.m in Sources */ = {isa = PBXBuildFile; fileRef = 08FDD0BC1B9E93900097313A /* GiveGiftAlertView.m */; };
-		08FDD0BF1B9E93A80097313A /* GiveGiftAlertView.xib in Resources */ = {isa = PBXBuildFile; fileRef = 08FDD0BE1B9E93A80097313A /* GiveGiftAlertView.xib */; };
 		08FDD1001B9EE31E0097313A /* .gitkeep in Resources */ = {isa = PBXBuildFile; fileRef = 08FDD0C21B9EE31D0097313A /* .gitkeep */; };
 		08FDD1011B9EE31E0097313A /* ImageError.png in Resources */ = {isa = PBXBuildFile; fileRef = 08FDD0C31B9EE31D0097313A /* ImageError.png */; };
 		08FDD1021B9EE31E0097313A /* ImageError@2x.png in Resources */ = {isa = PBXBuildFile; fileRef = 08FDD0C41B9EE31D0097313A /* ImageError@2x.png */; };
@@ -1162,6 +1162,7 @@
 		08B8E5131B78F6B9003084C3 /* YMTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YMTableViewCell.m; sourceTree = "<group>"; };
 		08B8E5141B78F6B9003084C3 /* YMTapGestureRecongnizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = YMTapGestureRecongnizer.h; sourceTree = "<group>"; };
 		08B8E5151B78F6B9003084C3 /* YMTapGestureRecongnizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = YMTapGestureRecongnizer.m; sourceTree = "<group>"; };
+		08BE519D1BAFB08300B1A8ED /* GiveGiftAlertView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; path = GiveGiftAlertView.xib; sourceTree = "<group>"; };
 		08D22B4B1BA0113600062F0E /* ApiXml.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ApiXml.h; sourceTree = "<group>"; };
 		08D22B4C1BA0113600062F0E /* ApiXml.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = ApiXml.mm; sourceTree = "<group>"; };
 		08D22B4D1BA0113600062F0E /* payRequsestHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = payRequsestHandler.h; sourceTree = "<group>"; };
@@ -1373,7 +1374,6 @@
 		08FDD0B61B9E7B7B0097313A /* rank3.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = rank3.png; sourceTree = "<group>"; };
 		08FDD0BB1B9E93900097313A /* GiveGiftAlertView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = GiveGiftAlertView.h; sourceTree = "<group>"; };
 		08FDD0BC1B9E93900097313A /* GiveGiftAlertView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GiveGiftAlertView.m; sourceTree = "<group>"; };
-		08FDD0BE1B9E93A80097313A /* GiveGiftAlertView.xib */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.xib; name = GiveGiftAlertView.xib; path = ../../../GiveGiftAlertView.xib; sourceTree = "<group>"; };
 		08FDD0C21B9EE31D0097313A /* .gitkeep */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitkeep; sourceTree = "<group>"; };
 		08FDD0C31B9EE31D0097313A /* ImageError.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = ImageError.png; sourceTree = "<group>"; };
 		08FDD0C41B9EE31D0097313A /* ImageError@2x.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = "ImageError@2x.png"; sourceTree = "<group>"; };
@@ -3586,9 +3586,9 @@
 		08FDD0BA1B9E8E910097313A /* GiveGiftAlertView */ = {
 			isa = PBXGroup;
 			children = (
+				08BE519D1BAFB08300B1A8ED /* GiveGiftAlertView.xib */,
 				08FDD0BB1B9E93900097313A /* GiveGiftAlertView.h */,
 				08FDD0BC1B9E93900097313A /* GiveGiftAlertView.m */,
-				08FDD0BE1B9E93A80097313A /* GiveGiftAlertView.xib */,
 			);
 			name = GiveGiftAlertView;
 			sourceTree = "<group>";
@@ -3779,7 +3779,6 @@
 				08F46FB21B9B41420014DEE2 /* mall_eco.png in Resources */,
 				08D75AF81B6FBE250035461F /* GiftListTableViewCell.xib in Resources */,
 				0813E2C51BAE5101002D5CED /* advert.jpg in Resources */,
-				08FDD0BF1B9E93A80097313A /* GiveGiftAlertView.xib in Resources */,
 				088CE3111B750441002491C0 /* placehloder.png in Resources */,
 				08A3616D1B9F56B600D19CCC /* UMSocialSDKResourcesNew.bundle in Resources */,
 				08303A341B8C19E700CE39DF /* HomeFilesTableViewCell.xib in Resources */,
@@ -3826,6 +3825,7 @@
 				08FDD11C1B9EE31E0097313A /* UIBarButtonItemGrid.png in Resources */,
 				08B8E51D1B78F6B9003084C3 /* 02@2x.png in Resources */,
 				0841D82E1B85A50F00CE4A04 /* RongCloud.bundle in Resources */,
+				08BE519E1BAFB08300B1A8ED /* GiveGiftAlertView.xib in Resources */,
 				0841D82B1B85A50F00CE4A04 /* Emoji.plist in Resources */,
 				088CE31D1B750441002491C0 /* vip1.png in Resources */,
 				08FDD1061B9EE31E0097313A /* ImageSelectedOff@3x.png in Resources */,
