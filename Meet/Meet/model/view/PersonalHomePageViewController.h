@@ -10,4 +10,5 @@
 
 @interface PersonalHomePageViewController : BaseViewController
 @property (nonatomic,copy) NSString * memberId;
+@property (nonatomic,strong) NSString * mark;
 @end

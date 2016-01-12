@@ -369,49 +369,7 @@
             friendList(cacheList);
         }
     }];
-//    [AFHttpTool getFriendListFromServerSuccess:^(id response) {
-//        NSString *code = [NSString stringWithFormat:@"%@",response[@"code"]];
-//        if (friendList) {
-//            if ([code isEqualToString:@"200"]) {
-//                [_allFriends removeAllObjects];
-//                NSArray * regDataArray = response[@"result"];
-//                [[RCDataBaseManager shareInstance] clearFriendsData];
-//                for(int i = 0;i < regDataArray.count;i++){
-//                    NSDictionary *dic = [regDataArray objectAtIndex:i];
-//                    if([[dic objectForKey:@"status"] intValue] != 1)
-//                        continue;
-//                    
-//                    RCDUserInfo*userInfo = [RCDUserInfo new];
-//                    NSNumber *idNum = [dic objectForKey:@"id"];
-//                    userInfo.userId = [NSString stringWithFormat:@"%d",idNum.intValue];
-//                    userInfo.portraitUri = [dic objectForKey:@"portrait"];
-//                    userInfo.name = [dic objectForKey:@"username"];
-//                    userInfo.email = [dic objectForKey:@"email"];
-//                    userInfo.status = [dic objectForKey:@"status"];
-//                    [list addObject:userInfo];
-//                    [_allFriends addObject:userInfo];
-//                    RCUserInfo *user = [RCUserInfo new];
-//                    user.userId = [NSString stringWithFormat:@"%d",idNum.intValue];
-//                    user.portraitUri = [dic objectForKey:@"portrait"];
-//                    user.name = [dic objectForKey:@"username"];
-//                    [[RCDataBaseManager shareInstance] insertUserToDB:user];
-//                    [[RCDataBaseManager shareInstance] insertFriendToDB:user];
-//                }
-//                dispatch_async(dispatch_get_main_queue(), ^(void) {
-//                    friendList(list);
-//                });
-//                
-//            }else{
-//                friendList(list);
-//            }
-//            
-//        }
-//    } failure:^(id response) {
-//        if (friendList) {
-//            NSMutableArray *cacheList=[[NSMutableArray alloc]initWithArray:[[RCDataBaseManager shareInstance] getAllFriends]];
-//            friendList(cacheList);
-//        }
-//    }];
+
 }
 
 - (void)searchFriendListByEmail:(NSString*)email complete:(void (^)(NSMutableArray*))friendList

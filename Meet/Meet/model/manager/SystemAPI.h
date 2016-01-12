@@ -93,4 +93,20 @@
 +(void)GetMyFriendCircleRequest:(GetMyFriendCircleRequest *)request success:(void(^)(GetMyFriendCircleResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
 +(void)DeleteCirclePostRequest:(DeleteCirclePostRequest *)request success:(void(^)(DeleteCirclePostResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
 +(void)ReportUserRequest:(ReportUserRequest *)request success:(void(^)(ReportUserResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)GetNearlyVisitCountRequest:(GetNearlyVisitCountRequest *)request success:(void(^)(id data))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)UpdateGetuiCidRequest:(UpdateGetuiCidRequest *)request success:(void(^)(UpdateGetuiCidResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)GetIndexCategoryRequest:(GetIndexCategoryRequest *)request success:(void(^)(GetIndexCategoryResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)GetIndexVideoListRequest:(GetIndexVideoListRequest *)request success:(void(^)(GetIndexVideoListResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)IAPPurchaseRequest:(IAPPurchaseRequest *)request success:(void(^)(IAPPurchaseResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)DeleteCircleCommentRequest:(DeleteCircleCommentRequest *)request success:(void(^)(DeleteCircleCommentResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)IsLoginReqeust:(IsLoginReqeust *)request success:(void(^)(id data))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)RegisterExternRequest:(RegisterExternRequest *)request success:(void(^)(RegisterExternResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)BlindMobileRequest:(BlindMobileRequest *)request success:(void(^)(BlindMobileResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)BlindExternRequest:(BlindExternRequest *)request success:(void(^)(BlindExternResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)GetDatingDataRequest:(GetDatingDataRequest *)request success:(void(^)(GetDatingDataResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
++(void)PublishDatingRequest:(PublishDatingRequest *)request success:(void(^)(PublishDatingResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
+/**
+ *  分享回调
+ */
++(void)ShareCallBackRequest:(ShareCallBackRequest *)request success:(void(^)(ShareCallBackResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
 @end

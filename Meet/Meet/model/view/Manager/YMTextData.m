@@ -141,7 +141,7 @@
         
         [_ilcoreText setOldString:matchString andNewString:newString];
         
-        height =  height + [_ilcoreText getTextHeight] +0;
+        height =  height + [_ilcoreText getTextHeight] +3;
         
     }
     

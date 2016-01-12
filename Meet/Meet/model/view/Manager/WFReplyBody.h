@@ -15,16 +15,28 @@
  */
 @property (nonatomic,copy) NSString *replyUser;
 
+/**
+ *  评论者ID
+ *
+ */
+@property (nonatomic,copy) NSString *replyUserId;
 
 /**
  *  回复该评论者的人
  */
 @property (nonatomic,copy) NSString *repliedUser;
+/**
+ *  回复该评论者的人ID
+ */
+@property (nonatomic,copy) NSString *repliedUserId;
 
 /**
  *  回复内容
  */
 @property (nonatomic,copy) NSString *replyInfo;
 
-
+/**
+ *  评论ID
+ */
+@property (nonatomic,strong) NSString * commentId;
 @end

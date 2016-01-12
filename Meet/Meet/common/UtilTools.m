@@ -249,7 +249,7 @@
             _name = @"file";
             _mimeType = @"image/jpg";
             _image = image;
-            _fileData = UIImageJPEGRepresentation(image, 0.3);
+            _fileData = UIImageJPEGRepresentation(image, 1.0);
             if (_fileData == nil)
             {
                 _fileData = UIImagePNGRepresentation(image);

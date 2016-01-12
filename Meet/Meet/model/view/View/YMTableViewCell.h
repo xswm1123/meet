@@ -7,6 +7,7 @@
 //
 
 #import <UIKit/UIKit.h>
+#import <AVFoundation/AVFoundation.h>
 #import "YMTextData.h"
 #import "WFTextView.h"
 #import "YMButton.h"
@@ -20,6 +21,9 @@
 - (void)longClickRichText:(NSInteger)index replyIndex:(NSInteger)replyIndex;
 -(void)clickPhotoIv:(NSInteger)index viewCell:(YMTableViewCell*)cell;
 -(void)deletePostAtIndex:(NSInteger)postId;
+-(void)clickReplyNickNameWithReplyIndex:(NSInteger)replyIndex viewCell:(YMTableViewCell*)cell;
+-(void)callWithNumber:(NSString *)phoneNmuber;
+-(void)playVideoWithPlayer:(AVPlayer*)player cell:(YMTableViewCell*)cell;
 @end
 
 @interface YMTableViewCell : UITableViewCell<WFCoretextDelegate>
@@ -57,6 +61,15 @@
  *
  */
 @property(nonatomic,strong) UIButton * deleteButton;
+/**
+ *  视频背景view
+ */
+@property(nonatomic,strong) UIView * videoBG;
+/**
+ *  播放器对象
+ */
+@property (nonatomic,strong) AVPlayer *player;
+
 - (void)setYMViewWith:(YMTextData *)ymData;
 
 @end

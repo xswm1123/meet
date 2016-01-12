@@ -115,7 +115,7 @@
 #pragma mark - ZYQAssetPickerController Delegate
 -(void)assetPickerController:(ZYQAssetPickerController *)picker didFinishPickingAssets:(NSArray *)assets{
     self.send.enabled=YES;
-    int m=self.imageIVs.count;
+    NSInteger m=self.imageIVs.count;
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         if (self.image) {
             self.imageBgHight.constant=self.imageBgHight.constant+(imageWith+10)*((assets.count+1)/4);
@@ -125,7 +125,7 @@
         [self updateViewConstraints];
         for (int i=0; i<assets.count; i++) {
             ALAsset *asset=assets[i];
-            int j=0;
+            NSInteger j=0;
                 j=i+m;
             UIImageView *imgview=[[UIImageView alloc] initWithFrame:CGRectMake(10+(imageWith+10)*(j%4),10+(imageWith+10)*(j/4),imageWith,imageWith)];
             
@@ -147,7 +147,7 @@
                     if (self.imageIVs.count==9) {
                         self.btnBg.hidden=YES;
                     }else{
-                        int k=self.imageIVs.count;
+                        NSInteger k=self.imageIVs.count;
                         self.btnBg.frame=CGRectMake(10+(imageWith+10)*(k%4),10+(imageWith+10)*(k/4),imageWith,imageWith);
                     }
 
@@ -204,7 +204,7 @@
         self.btnBg.hidden=YES;
     }else{
         self.btnBg.hidden=NO;
-        int k=self.imageIVs.count;
+        NSInteger k=self.imageIVs.count;
         self.btnBg.frame=CGRectMake(10+(imageWith+10)*(k%4),10+(imageWith+10)*(k/4),imageWith,imageWith);
     }
     for (int i=0; i<self.imageIVs.count; i++) {
@@ -280,8 +280,10 @@
         [textView resignFirstResponder];
         return NO;
     }
-    if (textView.text.length>0) {
+    if (textView.text.length-1>0||text.length>0) {
         self.send.enabled=YES;
+    }else{
+        self.send.enabled=NO;
     }
     return YES;
 }

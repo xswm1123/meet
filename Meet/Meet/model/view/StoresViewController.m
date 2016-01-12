@@ -32,6 +32,7 @@
 @property (nonatomic,strong) NSMutableArray * storeCategory;
 @property (nonatomic,strong) NSMutableArray * listData;
 @property (nonatomic,copy) NSString * tempCityId;
+@property (nonatomic,assign) NSInteger pageSize;
 
 @end
 #define StoresListTableViewCellId @"StoresListTableViewCell"
@@ -39,6 +40,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+     self.pageSize=10;
     [self initView];
     self.tempCityId=[[ShareValue shareInstance].cityId copy];
     NSNotificationCenter *defaultCenter = [NSNotificationCenter defaultCenter];
@@ -46,6 +48,14 @@
     [self getStoreCategoryList];
     self.tableView.header=[MJRefreshNormalHeader headerWithRefreshingBlock:^{
         [self getDataWithSegment:self.segmentControl];
+    }];
+    self.tableView.footer=[MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
+         self.pageSize+=10;
+        if (self.pageSize>110) {
+            [self.tableView.footer noticeNoMoreData];
+        }else{
+        [self getDataWithSegment:self.segmentControl];
+        }
     }];
 }
 -(void)locationDidChanged:(NSNotification*)noti{
@@ -175,16 +185,16 @@
 -(void)getDataWithSegment:(UISegmentedControl*)sege{
     if (sege.selectedSegmentIndex==0) {
         if (self.restrantBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:0 SortId:@"distance"];
+            [self loadListDatasWithCategoryId:0 SortId:@"default"];
         }
         if (self.hotelBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:1 SortId:@"distance"];
+            [self loadListDatasWithCategoryId:1 SortId:@"default"];
         }
         if (self.KTVBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:2 SortId:@"distance"];
+            [self loadListDatasWithCategoryId:2 SortId:@"default"];
         }
         if (self.coffeeBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:3 SortId:@"distance"];
+            [self loadListDatasWithCategoryId:3 SortId:@"default"];
         }
     }
     if (sege.selectedSegmentIndex==1) {
@@ -204,16 +214,16 @@
     }
     if (sege.selectedSegmentIndex==2) {
         if (self.restrantBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:0 SortId:@"default"];
+            [self loadListDatasWithCategoryId:0 SortId:@"distance"];
         }
         if (self.hotelBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:1 SortId:@"default"];
+            [self loadListDatasWithCategoryId:1 SortId:@"distance"];
         }
         if (self.KTVBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:2 SortId:@"default"];
+            [self loadListDatasWithCategoryId:2 SortId:@"distance"];
         }
         if (self.coffeeBtn.selected==YES) {
-            [self loadListDatasWithCategoryId:3 SortId:@"default"];
+            [self loadListDatasWithCategoryId:3 SortId:@"distance"];
         }
         
     }
@@ -233,7 +243,7 @@
             NSDictionary * dic=[names objectAtIndex:i];
             [btn setTitle:[dic objectForKey:@"name"] forState:UIControlStateNormal];
         }
-        [self loadListDatasWithCategoryId:0 SortId:@"distance"];
+        [self loadListDatasWithCategoryId:0 SortId:@"default"];
     } fail:^(BOOL notReachable, NSString *desciption) {
         
     }];
@@ -251,15 +261,18 @@
     request.areaId=self.tempCityId;
     request.lat=[ShareValue shareInstance].currentLocation.latitude;
     request.lng=[ShareValue shareInstance].currentLocation.longitude;
+    request.pageSize=self.pageSize;
     [MBProgressHUD showHUDAddedTo:self.view.window animated:YES];
     self.listData=nil;
     [SystemAPI GetStoreListsRequest:request success:^(GetStoreListsResponse *response) {
         self.listData=[NSMutableArray arrayWithArray:(NSArray*)response.data];
         [self.tableView.header endRefreshing];
+         [self.tableView.footer endRefreshing];
         [self.tableView reloadData];
         [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
     } fail:^(BOOL notReachable, NSString *desciption) {
         [self.tableView.header endRefreshing];
+        [self.tableView.footer endRefreshing];
         [self.tableView reloadData];
          [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
         [MBProgressHUD showError:desciption toView:self.view.window];

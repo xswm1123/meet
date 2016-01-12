@@ -258,3 +258,42 @@
 @implementation ReportUserResponse
 
 @end
+@implementation GetNearlyVisitCountResponse
+
+@end
+@implementation UpdateGetuiCidResponse
+
+@end
+@implementation GetIndexCategoryResponse
+
+@end
+@implementation GetIndexVideoListResponse
+
+@end
+@implementation IAPPurchaseResponse
+
+@end
+@implementation DeleteCircleCommentResponse
+
+@end
+@implementation IsLoginResponse
+
+@end
+@implementation RegisterExternResponse
+
+@end
+@implementation BlindMobileResponse
+
+@end
+@implementation BlindExternResponse
+
+@end
+@implementation GetDatingDataResponse
+
+@end
+@implementation PublishDatingResponse
+
+@end
+@implementation ShareCallBackResponse
+
+@end

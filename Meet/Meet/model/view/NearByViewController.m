@@ -41,7 +41,7 @@
          [self loadNearByUsersWith:baseSex AndMinAge:baseMinAge MaxAge:baseMaxAge];
     }];
     self.tableView.footer=[MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
-        if (self.pageSize<40) {
+        if (self.pageSize<1000) {
             self.pageSize+=10;
             [self loadNearByUsersWith:baseSex AndMinAge:baseMinAge MaxAge:baseMaxAge];
         }else{
@@ -56,7 +56,7 @@
     self.sexBtn.backgroundColor=cellColor;
     [self.sexBtn setTitle:@"性别不限▼" forState:UIControlStateNormal];
     self.ageBtn.backgroundColor=cellColor;
-    [self.ageBtn setTitle:@"年龄不限▼" forState:UIControlStateNormal];
+    [self.ageBtn setTitle:@"18岁以上▼" forState:UIControlStateNormal];
     //load data 默认加载性别不限，年龄不限
     [self loadNearByUsersWith:nil AndMinAge:nil MaxAge:nil];
     self.markLabel=[[UILabel alloc]initWithFrame:CGRectMake(8, 100, DEVCE_WITH-16, 40)];
@@ -142,12 +142,12 @@
     UIButton * btn=sender;
     NSArray *menuItems =
     @[
-      [KxMenuItem menuItem:@"年龄不限"
+      [KxMenuItem menuItem:@"18岁"
                      image:nil
                     target:self
                     action:@selector(allAges)],
       
-      [KxMenuItem menuItem:@"18以下"
+      [KxMenuItem menuItem:@"18以上"
                      image:nil
                     target:self
                     action:@selector(under18Years)],
@@ -211,7 +211,7 @@
  *  年龄不限
  */
 -(void)allAges{
-    [self.ageBtn setTitle:@"年龄不限▼" forState:UIControlStateNormal];
+    [self.ageBtn setTitle:@"18岁▼" forState:UIControlStateNormal];
     baseMinAge=nil;
     baseMaxAge=nil;
     [self loadNearByUsersWith:baseSex AndMinAge:baseMinAge MaxAge:baseMaxAge];
@@ -220,7 +220,7 @@
  *  18岁以下
  */
 -(void)under18Years{
-     [self.ageBtn setTitle:@"18岁一下▼" forState:UIControlStateNormal];
+     [self.ageBtn setTitle:@"18以上▼" forState:UIControlStateNormal];
     baseMinAge=nil;
     baseMaxAge=@"18";
     [self loadNearByUsersWith:baseSex AndMinAge:baseMinAge MaxAge:baseMaxAge];
@@ -298,12 +298,14 @@
          names=[NSString stringWithFormat:@"%@%@",cell.name,@"\U0000e617"];
         NSMutableAttributedString* str=[[NSMutableAttributedString alloc]initWithString:names];
         [str addAttribute:NSForegroundColorAttributeName value:[UIColor whiteColor] range:NSMakeRange(0, cell.name.length)];
+        [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, cell.name.length)];
         [str addAttribute:NSForegroundColorAttributeName value:iconBlue range:NSMakeRange(cell.name.length, str.length-cell.name.length)];
         cell.lb_name.attributedText=str;
     }else{
          names=[NSString stringWithFormat:@"%@%@",cell.name,@"\U0000e616"];
         NSMutableAttributedString* str=[[NSMutableAttributedString alloc]initWithString:names];
         [str addAttribute:NSForegroundColorAttributeName value:[UIColor whiteColor] range:NSMakeRange(0, cell.name.length)];
+         [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, cell.name.length)];
         [str addAttribute:NSForegroundColorAttributeName value:iconRed range:NSMakeRange(cell.name.length, str.length-cell.name.length)];
         cell.lb_name.attributedText=str;
     }

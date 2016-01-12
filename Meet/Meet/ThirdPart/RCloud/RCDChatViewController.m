@@ -25,6 +25,8 @@
 @interface RCDChatViewController () <UIActionSheetDelegate, RCRealTimeLocationObserver, RealTimeLocationStatusViewDelegate, UIAlertViewDelegate, RCMessageCellDelegate>
 @property (nonatomic, weak)id<RCRealTimeLocationProxy> realTimeLocation;
 @property (nonatomic, strong)RealTimeLocationStatusView *realTimeLocationStatusView;
+@property (nonatomic,strong) NSMutableArray * customerEmojs;
+@property (nonatomic,strong) UIScrollView * emojScrollView;
 @end
 
 @implementation RCDChatViewController
@@ -32,6 +34,8 @@
 - (void)viewDidLoad {
   [super viewDidLoad];
     //data
+    [IQKeyboardManager sharedManager].enable=NO;
+    [IQKeyboardManager sharedManager].enableAutoToolbar=NO;
     self.conversationType = self.conversation.conversationType;
     self.targetId = self.conversation.targetId;
     self.userName = self.conversation.conversationTitle;
@@ -122,7 +126,11 @@
     }
     [self appendAndDisplayMessage:savedMsg];
 */
+    [self.pluginBoardView insertItemWithImage:[UIImage imageNamed:@"biaoq.png"]
+                                        title:@"表情"
+                                          tag:666];
 }
+
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
     self.tabBarController.tabBar.hidden=YES;
@@ -337,10 +345,69 @@
                 }
                 
             } break;
+            case 666:
+            /**
+             *  发送自定义表情图片
+             */
+            if ([ShareValue shareInstance].isDownloadMOMO||[ShareValue shareInstance].isDownloadQQ) {
+                [self showCustomerEmojView];
+            }else{
+                [MBProgressHUD showError:@"您还没有下载表情哦~" toView:self.view];
+            }
+            break;
         default:
             [super pluginBoardView:pluginBoardView clickedItemWithTag:tag];
             break;
     }
+}
+#pragma 自定义表情图片的处理
+-(void)showCustomerEmojView{
+    self.customerEmojs=[NSMutableArray array];
+    CGFloat CustomerEmojWidth = self.pluginBoardView.frame.size.height/3-10;
+    NSInteger num =(DEVCE_WITH-30)/(CustomerEmojWidth+10);
+    self.emojScrollView=[[UIScrollView alloc]initWithFrame:CGRectMake(-15,-15, self.pluginBoardView.frame.size.width, self.pluginBoardView.frame.size.height)];
+    self.emojScrollView.backgroundColor=[UIColor whiteColor];
+    NSLog(@"frame:%f,%f",self.pluginBoardView.frame.size.width, self.pluginBoardView.frame.size.height);
+    NSString *cachPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,NSUserDomainMask, YES) objectAtIndex:0];
+    NSString * destination =[cachPath stringByAppendingString:@"/Emoj/qq"];
+    if ([ShareValue shareInstance].isDownloadQQ) {
+        destination =[cachPath stringByAppendingString:@"/Emoj/qq"];
+    }
+    if ([ShareValue shareInstance].isDownloadMOMO) {
+        destination =[cachPath stringByAppendingString:@"/Emoj/mo"];
+    }
+    NSArray *tempFiles = [[NSFileManager defaultManager] subpathsAtPath:destination];
+    for (int i=0; i<tempFiles.count; i++) {
+        NSString *p=tempFiles[i];
+        if ([p hasSuffix:@"png"]) {
+            NSString *path = [destination stringByAppendingPathComponent:p];
+            UIImageView * imageView=[[UIImageView alloc]initWithFrame:CGRectMake(10+(5+CustomerEmojWidth)*(i%num), 10+(10+CustomerEmojWidth)*(i/num), CustomerEmojWidth, CustomerEmojWidth)];
+            UIImage * image =[UIImage imageWithContentsOfFile:path];
+            NSLog(@"p:%@",path);
+            imageView.image=image;
+            imageView.tag=i;
+            imageView.userInteractionEnabled=YES;
+            [self.customerEmojs addObject:imageView];
+            [self.emojScrollView addSubview:imageView];
+            self.emojScrollView.contentSize=CGSizeMake(DEVCE_WITH, (10+CustomerEmojWidth)*(i/num+1));
+            //添加手势
+            UITapGestureRecognizer * tap =[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(sendCustomerEmoj:)];
+            [imageView addGestureRecognizer:tap];
+        }
+    }
+    [self.pluginBoardView addSubview:self.emojScrollView];
+}
+-(void)sendCustomerEmoj:(UIGestureRecognizer*)gesture{
+    NSString * pushContent =[NSString stringWithFormat:@"%@发来了一个自定义表情",[ShareValue shareInstance].userInfo.nickname];
+    UIView * view =gesture.view;
+    
+    UIImageView * imageView=[self.customerEmojs objectAtIndex:view.tag];
+
+    RCImageMessage * imageMessage=[RCImageMessage messageWithImage:imageView.image];
+    [self sendImageMessage:imageMessage pushContent:pushContent];
+    self.customerEmojs=nil;
+    [self.emojScrollView removeFromSuperview];
+    [self.chatSessionInputBarControl.delegate didTouchEmojiButton:nil];
 }
 - (RealTimeLocationStatusView *)realTimeLocationStatusView {
     if (!_realTimeLocationStatusView) {

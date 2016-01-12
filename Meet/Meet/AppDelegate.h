@@ -16,16 +16,16 @@
 #import "UMSocialQQHandler.h"
 #import "UMSocialSinaHandler.h"
 #import "WXApi.h"
-#import "GeTuiSdk.h"
 #import "LanuchAdsManager.h"
+#import "APService.h"
 
-#define UmengAppkey @"55272ee8fd98c5f4db000fab"
+//#define UmengAppkey @"55272ee8fd98c5f4db000fab"
+#define UmengAppkey @"5646e3dd67e58e73d50057d1"
 
-@interface AppDelegate : UIResponder <UIApplicationDelegate,RCIMConnectionStatusDelegate,RCIMReceiveMessageDelegate,GeTuiSdkDelegate>
+@interface AppDelegate : UIResponder <UIApplicationDelegate,RCIMConnectionStatusDelegate,RCIMReceiveMessageDelegate>
 {
     BMKMapManager* mapManager;
     CLLocationManager   *managerLocate;
-    GeTuiSdk * geTui;
 }
 
 @property (strong, nonatomic) UIWindow *window;

@@ -12,6 +12,8 @@
 #import "GiftListTableViewCell.h"
 #import "GiveGiftAlertView.h"
 #import "StoreCenterViewController.h"
+#import "RCDChatViewController.h"
+#import "PersonalHomePageViewController.h"
 
 #define INFO_CELL @"INFO_CELL"
 #define COMMENT_CELL @"COMMENT_CELL"
@@ -52,9 +54,12 @@
 @property (nonatomic,strong) NSArray * picList;
 @property (nonatomic,strong) NSMutableArray * images;
 @property (nonatomic,strong) NSMutableArray * photos;
+@property (nonatomic,strong) NSDictionary * detailsInfo;
 //give gift
 @property (nonatomic,strong) UIView * mask;
 @property (nonatomic,strong) GiveGiftAlertView * giveView;
+@property (weak, nonatomic) IBOutlet UIButton *chatBtn;
+@property (weak, nonatomic) IBOutlet NSLayoutConstraint *infoBGHeightConstant;
 @property (nonatomic,strong) NSDictionary * giveInfo;
 @end
 
@@ -87,6 +92,13 @@
     GetStoreDetailsRequest * request=[[GetStoreDetailsRequest alloc]init];
     request.storeId=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"storeId"]];
     [SystemAPI GetStoreDetailsRequest:request success:^(GetStoreDetailsResponse *response) {
+        self.detailsInfo=[NSDictionary dictionaryWithDictionary:response.data];
+        if ([[response.data objectForKey:@"memberId"] isKindOfClass:[NSNull class]]) {
+            self.infoBGHeightConstant.constant=218-45;
+        }else{
+            self.infoBGHeightConstant.constant=218;
+        }
+        [self updateViewConstraints];
         self.lb_address.text=[NSString stringWithFormat:@"%@",[response.data objectForKey:@"address"]];
         [self.commentBtn setTitle:[NSString stringWithFormat:@"评论%@",[response.data objectForKey:@"commentNum"]] forState:UIControlStateNormal];
         [self.giftBtn setTitle:[NSString stringWithFormat:@"礼物%@",[response.data objectForKey:@"itemValue"]] forState:UIControlStateNormal];
@@ -120,6 +132,7 @@
 -(void)loadComments{
     GetStoreCommentsListRequest * request=[[GetStoreCommentsListRequest alloc]init];
     request.storeId=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"storeId"]];
+    request.pageSize=@"1000";
     [SystemAPI GetStoreCommentsListRequest:request success:^(GetStoreCommentsListResponse *response) {
         self.commentLists=[NSMutableArray arrayWithArray:(NSArray*)response.data];
         [self.tableView reloadData];
@@ -132,6 +145,7 @@
  */
 -(void)loadGifts{
     GetStoreReceivedGiftListRequest * request=[[GetStoreReceivedGiftListRequest alloc]init];
+    request.pageSize=@"1000";
      request.storeId=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"storeId"]];
     [SystemAPI GetStoreReceivedGiftListRequest:request success:^(GetStoreReceivedGiftListResponse *response) {
         self.giftLists =[NSMutableArray arrayWithArray:(NSArray*)response.data];
@@ -147,6 +161,14 @@
 -(void)initView{
     self.scrollView.backgroundColor=NAVI_COLOR;
     self.tableView.backgroundColor=NAVI_COLOR;
+    if ([self.tableView respondsToSelector:@selector(setSeparatorInset:)]) {
+        [self.tableView setSeparatorInset:UIEdgeInsetsZero];
+    }
+    if ([self.tableView respondsToSelector:@selector(setLayoutMargins:)]) {
+        
+        [self.tableView setLayoutMargins:UIEdgeInsetsZero];
+    }
+    self.tableView.separatorColor=NAVI_COLOR;
     self.lb_iconGift.font=[UIFont fontWithName:iconFont size:28];
     self.lb_iconGift.text=@"\U0000e61b";
     self.lb_iconGift.textColor=TempleColor;
@@ -187,10 +209,11 @@
     self.callBtn.layer.borderColor=iconGreen.CGColor;
     self.callBtn.layer.borderWidth=1;
     [self.callBtn setTitleColor:iconGreen forState:UIControlStateNormal];
-    self.applyStoreBtn.layer.cornerRadius=5;
-    self.applyStoreBtn.layer.borderColor=TempleColor.CGColor;
-    self.applyStoreBtn.layer.borderWidth=1;
-     [self.applyStoreBtn setTitleColor:TempleColor forState:UIControlStateNormal];
+    
+    self.chatBtn.layer.cornerRadius=5;
+    self.chatBtn.layer.borderColor=TempleColor.CGColor;
+    self.chatBtn.layer.borderWidth=1;
+     [self.chatBtn setTitleColor:TempleColor forState:UIControlStateNormal];
 }
 /**
  *  收藏商家
@@ -384,9 +407,9 @@
 {
     [super viewWillAppear:animated];
     self.navigationController.navigationBarHidden=NO;
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserver:self selector:@selector(keyboardAppear:) name:UIKeyboardWillShowNotification object:nil];
-    [center addObserver:self selector:@selector(keyboardDisappear:) name:UIKeyboardWillHideNotification object:nil];
+//    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+//    [center addObserver:self selector:@selector(keyboardAppear:) name:UIKeyboardWillShowNotification object:nil];
+//    [center addObserver:self selector:@selector(keyboardDisappear:) name:UIKeyboardWillHideNotification object:nil];
 }
 - (void)keyboardAppear:(NSNotification *)notification
 {
@@ -490,6 +513,25 @@
 
     return nil;
 }
+-(void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath{
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    if (self.commentBtn.selected==YES) {
+        NSDictionary * dic=[self.commentLists objectAtIndex:indexPath.row];
+        UIStoryboard * sb=[UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        PersonalHomePageViewController * vc=[sb instantiateViewControllerWithIdentifier:@"homePage"];
+        vc.memberId=[NSString stringWithFormat:@"%@",[dic objectForKey:@"memberId"]];
+        [self.navigationController pushViewController:vc animated:YES];
+    }
+}
+-(void)tableView:(UITableView *)tableView willDisplayCell:(UITableViewCell *)cell forRowAtIndexPath:(NSIndexPath *)indexPath{
+    if ([cell respondsToSelector:@selector(setSeparatorInset:)]) {
+        [cell setSeparatorInset:UIEdgeInsetsZero];
+    }
+    if ([cell respondsToSelector:@selector(setLayoutMargins:)]) {
+        
+        [cell setLayoutMargins:UIEdgeInsetsZero];
+    }
+}
 -(void)loadPhotos{
     self.images=[NSMutableArray array];
     for (NSString * url in self.picList) {
@@ -525,6 +567,24 @@
     if (index < self.photos.count)
         return [self.photos objectAtIndex:index];
     return nil;
+}
+- (IBAction)showCustomerService:(id)sender {
+    RCConversationModel * model=[[RCConversationModel alloc]init:
+                                 RC_CONVERSATION_MODEL_TYPE_NORMAL exntend:nil];
+    model.conversationType=ConversationType_PRIVATE;
+    model.targetId=[NSString stringWithFormat:@"%@",[self.detailsInfo objectForKey:@"memberId"]];
+    model.conversationTitle=[self.detailsInfo objectForKey:@"nickname"];
+    model.senderUserId=[ShareValue shareInstance].userInfo.id;
+    model.senderUserName=[ShareValue shareInstance].userInfo.nickname;
+    RCDChatViewController *_conversationVC = [[RCDChatViewController alloc]init];
+    _conversationVC.conversationType = ConversationType_PRIVATE;
+    _conversationVC.targetId = [NSString stringWithFormat:@"%@",[self.detailsInfo objectForKey:@"memberId"]];
+    _conversationVC.userName = [self.detailsInfo objectForKey:@"nickname"];
+    _conversationVC.title =[self.detailsInfo objectForKey:@"nickname"];
+    _conversationVC.conversation = model;
+    _conversationVC.enableNewComingMessageIcon=YES;//开启消息提醒
+    _conversationVC.enableUnreadMessageIcon=YES;
+    [self.navigationController pushViewController:_conversationVC animated:YES];
 }
 
 

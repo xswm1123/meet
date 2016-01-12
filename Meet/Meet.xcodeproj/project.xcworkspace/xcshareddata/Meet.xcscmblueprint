@@ -1,0 +1,30 @@
+{
+  "DVTSourceControlWorkspaceBlueprintPrimaryRemoteRepositoryKey" : "18429235708297A893B5A5B163CBFA196B93D2B6",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyRepositoryLocationsKey" : {
+
+  },
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyStatesKey" : {
+    "18429235708297A893B5A5B163CBFA196B93D2B6" : 0,
+    "820C9855458BDE87B02305F491D1A8D36727D159" : 0
+  },
+  "DVTSourceControlWorkspaceBlueprintIdentifierKey" : "BD407CB5-3016-4A26-B0DF-DEB7EF38CE2A",
+  "DVTSourceControlWorkspaceBlueprintWorkingCopyPathsKey" : {
+    "18429235708297A893B5A5B163CBFA196B93D2B6" : "meet\/",
+    "820C9855458BDE87B02305F491D1A8D36727D159" : ""
+  },
+  "DVTSourceControlWorkspaceBlueprintNameKey" : "Meet",
+  "DVTSourceControlWorkspaceBlueprintVersion" : 204,
+  "DVTSourceControlWorkspaceBlueprintRelativePathToProjectKey" : "Meet\/Meet.xcodeproj",
+  "DVTSourceControlWorkspaceBlueprintRemoteRepositoriesKey" : [
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/github.com\/xswm1123\/meet.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "18429235708297A893B5A5B163CBFA196B93D2B6"
+    },
+    {
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryURLKey" : "https:\/\/git.coding.net\/williex\/USAgent.git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositorySystemKey" : "com.apple.dt.Xcode.sourcecontrol.Git",
+      "DVTSourceControlWorkspaceBlueprintRemoteRepositoryIdentifierKey" : "820C9855458BDE87B02305F491D1A8D36727D159"
+    }
+  ]
+}

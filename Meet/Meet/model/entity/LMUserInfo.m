@@ -46,6 +46,10 @@
         _rongToken=dictionary[@"rongToken"];
         _isReceivedVip=[dictionary[@"isReceivedVip"]boolValue];
         _continueLoginCount=dictionary[@"continueLoginCount"];
+        _token=dictionary[@"token"];
+        _weixinOpenid=dictionary[@"weixinOpenid"];
+        _qqOpenid=dictionary[@"qqOpenid"];
+        _isShare=[dictionary[@"isShare"]boolValue];
     }
     return self;
 }

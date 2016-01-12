@@ -8,6 +8,7 @@
 
 #import "VIPCenterViewController.h"
 #import "VIPListTableViewCell.h"
+#import "RCDChatViewController.h"
 
 #define VIPList @"VIPListTableViewCell"
 
@@ -34,14 +35,14 @@
     }
     if ([self.type isEqualToString:@"1"]) {
         self.vipBtn.hidden=NO;
-        self.tableViewHeight.constant=150;
+        self.tableViewHeight.constant=100;
         [self updateViewConstraints];
     }
     
     self.tableView.backgroundColor=NAVI_COLOR;
     [self.tableView registerNib:[UINib nibWithNibName:@"VIPListTableViewCell" bundle:nil] forCellReuseIdentifier:VIPList];
-    NSArray * names =@[@"\U0000e600",@"\U0000e627",@"\U0000e601",@"\U0000e60b",@"\U0000e629",@"\U0000e628"];
-    NSArray * colors=@[iconYellow,iconGreen,iconBlue,iconRed,iconOrange,iconRed];
+    NSArray * names =@[@"\U0000e627",@"\U0000e60b",@"\U0000e60e",@"\U0000e61c",@"\U0000e60a",@"\U0000e61f",@"\U0000e632",@"\U0000e60d"];
+    NSArray * colors=@[iconYellow,iconGreen,iconBlue,iconOrange,iconYellow,iconGreen,iconRed,iconGreen];
     for (int i=0 ; i<self.labels.count; i++) {
         UILabel * label=[self.labels objectAtIndex:i];
         label.layer.cornerRadius=5;
@@ -79,10 +80,10 @@
 }
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     if ([self.type isEqualToString:@"2"]) {
-        return 5;
+        return 4;
     }
     if ([self.type isEqualToString:@"1"]) {
-        return 3;
+        return 2;
     }
     return 5;
 }
@@ -139,15 +140,19 @@
                 cell.lb_value.text=@"去续费";
                 cell.lb_value.textColor=TempleColor;
                 break;
+//            case 3:
+//                cell.lb_title.text=@"我的群组";
+//                cell.lb_content.text=self.myGroups;
+//                cell.lb_value.text=@"高级";
+//                break;
             case 3:
-                cell.lb_title.text=@"我的群组";
-                cell.lb_content.text=self.myGroups;
-                cell.lb_value.text=@"高级";
-                break;
-            case 4:
                 cell.lb_title.text=@"我的商家";
                 cell.lb_content.text=@"暂无商家";
-                cell.lb_value.text=@"申请成为商家";
+                if ([ShareValue shareInstance].userInfo.isStore) {
+                    cell.lb_value.text=@"管理商家";
+                }else{
+                    cell.lb_value.text=@"申请成为商家";
+                }
                 cell.lb_value.textColor=TempleColor;
                 break;
             default:
@@ -187,11 +192,11 @@
                 cell.lb_value.text=[NSString stringWithFormat:@"%@级",[ShareValue shareInstance].userInfo.level];
                 break;
                 
-            case 2:
-                cell.lb_title.text=@"我的群组";
-                cell.lb_content.text=self.myGroups;
-                cell.lb_value.text=@"初级";
-                break;
+//            case 2:
+//                cell.lb_title.text=@"我的群组";
+//                cell.lb_content.text=self.myGroups;
+//                cell.lb_value.text=@"初级";
+//                break;
             default:
                 break;
         }
@@ -204,8 +209,29 @@
         if (indexPath.row==2) {
             [self performSegueWithIdentifier:@"recharge" sender:nil];
         }
-        if (indexPath.row==4) {
-            [self performSegueWithIdentifier:@"recharge" sender:nil];
+        if (indexPath.row==3) {
+//            [self performSegueWithIdentifier:@"recharge" sender:nil];
+            if ([ShareValue shareInstance].userInfo.isStore) {
+                UIStoryboard * sb=[UIStoryboard storyboardWithName:@"Main" bundle:nil];
+                [self.navigationController pushViewController:[sb instantiateViewControllerWithIdentifier:@"StoreManagerViewController"] animated:YES];
+            }else{
+            RCConversationModel * model=[[RCConversationModel alloc]init:
+                                         RC_CONVERSATION_MODEL_TYPE_NORMAL exntend:nil];
+            model.conversationType=ConversationType_PRIVATE;
+            model.targetId=@"1";
+            model.conversationTitle=@"相遇小秘书";
+            model.senderUserId=[ShareValue shareInstance].userInfo.id;
+            model.senderUserName=[ShareValue shareInstance].userInfo.nickname;
+            RCDChatViewController *_conversationVC = [[RCDChatViewController alloc]init];
+            _conversationVC.conversationType = ConversationType_PRIVATE;
+            _conversationVC.targetId = @"1";
+            _conversationVC.userName = @"相遇小秘书";
+            _conversationVC.title = @"相遇小秘书";
+            _conversationVC.conversation = model;
+            _conversationVC.enableNewComingMessageIcon=YES;//开启消息提醒
+            _conversationVC.enableUnreadMessageIcon=YES;
+            [self.navigationController pushViewController:_conversationVC animated:YES];
+            }
         }
     }
 }

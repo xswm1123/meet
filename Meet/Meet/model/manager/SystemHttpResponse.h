@@ -261,3 +261,46 @@
 @interface ReportUserResponse : X_BaseHttpResponse
 
 @end
+@interface GetNearlyVisitCountResponse : NSObject
+@property(nonatomic,strong) NSString* code;
+@property(nonatomic,strong) NSString * message;
+@property(nonatomic,strong) id  data;
+@end
+@interface UpdateGetuiCidResponse : X_BaseHttpResponse
+
+@end
+@interface GetIndexCategoryResponse : X_BaseHttpResponse
+
+@end
+@interface GetIndexVideoListResponse : X_BaseHttpResponse
+
+@end
+@interface IAPPurchaseResponse : X_BaseHttpResponse
+
+@end
+@interface DeleteCircleCommentResponse : X_BaseHttpResponse
+
+@end
+@interface IsLoginResponse : NSObject
+@property(nonatomic,strong) NSString* code;
+@property(nonatomic,strong) NSString * message;
+@property(nonatomic,strong) id  data;
+@end
+@interface RegisterExternResponse : X_BaseHttpResponse
+
+@end
+@interface BlindMobileResponse : X_BaseHttpResponse
+
+@end
+@interface BlindExternResponse : X_BaseHttpResponse
+
+@end
+@interface GetDatingDataResponse : X_BaseHttpResponse
+
+@end
+@interface PublishDatingResponse : X_BaseHttpResponse
+
+@end
+@interface ShareCallBackResponse : X_BaseHttpResponse
+
+@end

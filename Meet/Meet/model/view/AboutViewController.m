@@ -17,9 +17,9 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    NSString *key = (NSString *)kCFBundleVersionKey;
+//    NSString *key = (NSString *)kCFBundleVersionKey;
     //加载程序中的info.plist
-    NSString *currentVersionCode = [NSBundle mainBundle].infoDictionary[key];
+    NSString *currentVersionCode = [NSBundle mainBundle].infoDictionary[@"CFBundleShortVersionString"];
     self.lb_currentVersion.text=[NSString stringWithFormat:@"V%@",currentVersionCode];
 }
 - (IBAction)contactService:(id)sender {

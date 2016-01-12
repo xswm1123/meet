@@ -15,6 +15,7 @@
     // Initialization code
     self.backgroundColor=cellColor;
     self.photoIV.layer.cornerRadius=5;
+    
 }
 
 - (void)setSelected:(BOOL)selected animated:(BOOL)animated {

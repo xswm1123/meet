@@ -10,4 +10,5 @@
 #import "AFNetworking.h"
 @interface UploadVideoViewController : BaseViewController
 @property (nonatomic,strong) NSURL * url;
+@property (nonatomic,strong) NSString * mark;
 @end

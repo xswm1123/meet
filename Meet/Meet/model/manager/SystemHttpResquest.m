@@ -106,7 +106,7 @@
 -(instancetype)init{
     self=[super init];
     if (self) {
-        
+        _memberId=[ShareValue shareInstance].userInfo.id;
     }
     return self;
 }
@@ -549,7 +549,7 @@
 -(instancetype)init{
     self=[super init];
     if (self) {
-//        _memberId=[ShareValue shareInstance].userInfo.id;
+        _memberId=[ShareValue shareInstance].userInfo.id;
     }
     return self;
 }
@@ -703,6 +703,105 @@
     if (self) {
         _memberId=[ShareValue shareInstance].userInfo.id;
         _category=@"1";
+    }
+    return self;
+}
+@end
+@implementation GetNearlyVisitCountRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation UpdateGetuiCidRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation GetIndexCategoryRequest
+
+@end
+@implementation GetIndexVideoListRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation IAPPurchaseRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation DeleteCircleCommentRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation IsLoginReqeust
+
+@end
+@implementation RegisterExternRequest
+
+@end
+@implementation BlindMobileRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation BlindExternRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation GetDatingDataRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation PublishDatingRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
+    }
+    return self;
+}
+@end
+@implementation ShareCallBackRequest
+-(instancetype)init{
+    self=[super init];
+    if (self) {
+        _memberId=[ShareValue shareInstance].userInfo.id;
     }
     return self;
 }

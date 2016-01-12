@@ -44,6 +44,10 @@
 @property(nonatomic,strong) NSString * rongToken;//连接融云的token
 @property(nonatomic,assign) BOOL  isReceivedVip;//是否领取过vip
 @property(nonatomic,strong) NSString * continueLoginCount;//连续登录天数
+@property(nonatomic,strong) NSString * token;//
+@property(nonatomic,strong) NSString * weixinOpenid;//
+@property(nonatomic,strong) NSString * qqOpenid;//
+@property(nonatomic,assign) BOOL isShare;//是否分享过
 
 -(instancetype)initWithDictionary:(NSDictionary*) dictionary;
 @end

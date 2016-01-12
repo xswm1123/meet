@@ -23,6 +23,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [ShareValue shareInstance].systemMessage=[NSNumber numberWithInt:0];
     self.tableView.backgroundColor=NAVI_COLOR;
     [self.tableView registerNib:[UINib nibWithNibName:@"SystemMessageTableViewCell" bundle:nil] forCellReuseIdentifier:MessageCell];
     [self.tableView registerNib:[UINib nibWithNibName:@"GiftListTableViewCell" bundle:nil] forCellReuseIdentifier:GiftCell];
@@ -81,7 +82,11 @@
         cell.photoUrl=[dic objectForKey:@"avatar"];
         cell.lb_name.text=[dic objectForKey:@"nickname"];
         cell.lb_date.text=[dic objectForKey:@"created"];
-        cell.lb_desc.text=[NSString stringWithFormat:@"%@",[dic objectForKey:@"content"]];
+        if ([[dic objectForKey:@"content"] isKindOfClass:[NSNull class]]) {
+            cell.lb_desc.text=@"";
+        }else{
+            cell.lb_desc.text=[NSString stringWithFormat:@"%@",[dic objectForKey:@"content"]];
+        }
         return cell;
     }
     if (self.segmentControl.selectedSegmentIndex==1) {

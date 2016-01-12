@@ -51,7 +51,12 @@
     self.conversationListTableView.backgroundColor=NAVI_COLOR;
 //    self.conversationListTableView.frame=CGRectMake(0, 80, DEVCE_WITH, DEVICE_HEIGHT-50);
     [self initView];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(unreadCountChanged:) name:NOTIFICATION_UNREAD_SYSTEMMESSAGE object:nil];
 }
+-(void)unreadCountChanged:(NSNotification*)noti{
+    [self.conversationListTableView reloadData];
+}
+
 -(id)initWithCoder:(NSCoder *)aDecoder
 {
     self =[super initWithCoder:aDecoder];
@@ -193,7 +198,6 @@
         temp.conversation = model;
         [self.navigationController pushViewController:temp animated:YES];
     }
-    
 }
 - (void)viewDidAppear:(BOOL)animated {
     [super viewDidAppear:animated];
@@ -284,6 +288,25 @@
     [cell.ivAva addSubview:la];
     UIView * view =[[UIView alloc]initWithFrame:CGRectMake(0, 67, DEVCE_WITH, 20)];
     view.backgroundColor=NAVI_COLOR;
+    //系统未读消息
+    UIView * countViews =[cell.contentView viewWithTag:8988];
+    [countViews removeFromSuperview];
+    //朋友圈
+    UILabel * friendCircleLabel=[[UILabel alloc]initWithFrame:CGRectMake(140, 23, 20, 20)];
+    friendCircleLabel.layer.cornerRadius=10;
+    friendCircleLabel.backgroundColor=[UIColor redColor];
+    friendCircleLabel.textColor=[UIColor whiteColor];
+    friendCircleLabel.clipsToBounds=YES;
+    friendCircleLabel.textAlignment=NSTextAlignmentCenter;
+    friendCircleLabel.font=[UIFont systemFontOfSize:14];
+    friendCircleLabel.adjustsFontSizeToFitWidth=YES;
+    friendCircleLabel.tag=8988;
+    if ([[ShareValue shareInstance].systemMessage intValue]>0) {
+        friendCircleLabel.text=[NSString stringWithFormat:@"%d",[[ShareValue shareInstance].systemMessage intValue]];
+        [cell.contentView addSubview:friendCircleLabel];
+    }else{
+        [friendCircleLabel removeFromSuperview];
+    }
     [cell.contentView addSubview:view];
     return cell;
 }

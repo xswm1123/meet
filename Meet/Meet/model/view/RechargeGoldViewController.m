@@ -7,8 +7,9 @@
 //
 
 #import "RechargeGoldViewController.h"
+#import <StoreKit/StoreKit.h>
 
-@interface RechargeGoldViewController ()<UIActionSheetDelegate>
+@interface RechargeGoldViewController ()<UIActionSheetDelegate,SKPaymentTransactionObserver,SKProductsRequestDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *aliPayBtn;
 @property (weak, nonatomic) IBOutlet UIButton *wePayBtn;
 @property (weak, nonatomic) IBOutlet UILabel *lb_info;
@@ -22,13 +23,23 @@
 @property (nonatomic,assign) NSInteger money;
 @property (nonatomic,strong) NSArray * types;
 @property (nonatomic ,strong) NSArray * moneys;
+@property (nonatomic,assign) BOOL canUpdate;
 @end
 
 @implementation RechargeGoldViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.canUpdate=NO;
+      //添加内支付监听
+    [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     [self initView];
+    //判断是否安装了微信
+    if (![WXApi isWXAppInstalled]) {
+        self.aliPayBtn.hidden=YES;
+        self.wePayBtn.hidden=YES;
+    }
+
 }
 -(void)initView{
     self.types=@[@"3000",@"5288",@"11111",@"23888",@"62500",@"142888"];
@@ -60,20 +71,25 @@
     //data
     self.lb_ID.text=[NSString stringWithFormat:@"%@",[ShareValue shareInstance].userInfo.meetid];
     self.money=30;
-    NSString * moneys=[NSString stringWithFormat:@"%d",self.money];
+    NSString * moneys=[NSString stringWithFormat:@"%ld",self.money];
     NSMutableAttributedString * mn=[[NSMutableAttributedString alloc]initWithString:[NSString stringWithFormat:@"%@元",moneys]];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:22],NSForegroundColorAttributeName:iconYellow} range:NSMakeRange(0, moneys.length)];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:17],NSForegroundColorAttributeName:[UIColor whiteColor]} range:NSMakeRange(moneys.length,mn.length-moneys.length)];
     self.lb_money.attributedText=mn;
 }
 -(void)setMoneyText:(NSInteger)money{
-    NSString * moneys=[NSString stringWithFormat:@"%d",money];
+    NSString * moneys=[NSString stringWithFormat:@"%ld",money];
     NSMutableAttributedString * mn=[[NSMutableAttributedString alloc]initWithString:[NSString stringWithFormat:@"%@元",moneys]];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:22],NSForegroundColorAttributeName:iconYellow} range:NSMakeRange(0, moneys.length)];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:17],NSForegroundColorAttributeName:[UIColor whiteColor]} range:NSMakeRange(moneys.length,mn.length-moneys.length)];
     self.lb_money.attributedText=mn;
 }
 - (IBAction)chooseCount:(id)sender {
+    if (![WXApi isWXAppInstalled]) {
+        UIActionSheet * al=[[UIActionSheet alloc]initWithTitle:@"请选择购买金币数量" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"3000", nil];
+        [al showInView:self.view.window];
+        return;
+    }
     UIActionSheet * al=[[UIActionSheet alloc]initWithTitle:@"请选择购买金币数量" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"3000",@"5288",@"11111",@"23888",@"62500",@"142888", nil];
     [al showInView:self.view.window];
 }
@@ -83,13 +99,18 @@
         self.money=[[self.moneys objectAtIndex:buttonIndex] integerValue];
         [self setMoneyText:self.money];
     }
+    if (![WXApi isWXAppInstalled]) {
+        self.lb_count.text=[NSString stringWithFormat:@"%@",[self.types objectAtIndex:0]];
+        self.money=[[self.moneys objectAtIndex:0] integerValue];
+        [self setMoneyText:self.money];
+    }
 }
 - (IBAction)minsAction:(id)sender {
     if ([self.lb_count.text integerValue]==1000) {
         [MBProgressHUD showError:@"不能再减少啦！" toView:self.view];
     }else{
         NSInteger count =[self.lb_count.text integerValue];
-        self.lb_count.text=[NSString stringWithFormat:@"%d",count-1000];
+        self.lb_count.text=[NSString stringWithFormat:@"%ld",count-1000];
         self.money=[self.lb_count.text integerValue]/100;
         [self setMoneyText:self.money];
         
@@ -97,7 +118,7 @@
 }
 - (IBAction)addAction:(id)sender {
     NSInteger count =[self.lb_count.text integerValue];
-    self.lb_count.text=[NSString stringWithFormat:@"%d",count+1000];
+    self.lb_count.text=[NSString stringWithFormat:@"%ld",count+1000];
     self.money=[self.lb_count.text integerValue]/100;
     [self setMoneyText:self.money];
 }
@@ -114,6 +135,14 @@
     [self.aliPayBtn setBackgroundColor:[UIColor clearColor]];
 }
 - (IBAction)buyAction:(id)sender {
+    self.canUpdate=YES;
+    if (![WXApi isWXAppInstalled]) {
+        [self payWithInPurse];
+        return;
+    }else{
+        self.canUpdate=NO;
+    }
+
     //微信支付
     if ([self.aliPayBtn isSelected]) {
         [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -161,7 +190,7 @@
     myOrder.tradeNO = ID; //订单ID（由商家自行制定）
     myOrder.productName = @"相遇金币充值"; //商品标题
     myOrder.productDescription =@"金币"; //商品描述
-    myOrder.amount = [NSString stringWithFormat:@"%d",self.money]; //商品价格
+    myOrder.amount = [NSString stringWithFormat:@"%ld",self.money]; //商品价格
     myOrder.notifyURL =  @"http://xy.immet.cm/xy/rest/pay/alipay_notify"; //回调URL
     myOrder.service = @"mobile.securitypay.pay";
     myOrder.paymentType = @"1";
@@ -170,7 +199,7 @@
     myOrder.showUrl = @"m.alipay.com";
     
     //应用注册scheme,在AlixPayDemo-Info.plist定义URL types
-    NSString *appScheme = @"alisdkdemo";
+    NSString *appScheme = @"alimeet";
     
     //将商品信息拼接成字符串
     NSString *orderSpec = [myOrder description];
@@ -214,6 +243,118 @@
     } fail:^(BOOL notReachable, NSString *desciption) {
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
         [MBProgressHUD showError:desciption toView:self.view];
+    }];
+}
+-(void)payWithInPurse{
+    NSString *product=@"com.immet.meets_golds";
+    if([SKPaymentQueue canMakePayments]){
+        [self requestProductData:product];
+    }else{
+        NSLog(@"不允许程序内付费");
+    }
+}
+//请求商品
+- (void)requestProductData:(NSString *)type{
+    NSLog(@"-------------请求对应的产品信息----------------");
+    //    NSArray *product = [[NSArray alloc] initWithObjects:type];
+    
+    NSSet *nsset = [NSSet setWithArray:@[type]];
+    SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:nsset];
+    request.delegate = self;
+    [request start];
+    
+}
+
+//收到产品返回信息
+- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response{
+    
+    NSLog(@"--------------收到产品反馈消息---------------------");
+    NSArray *product = response.products;
+    if([product count] == 0){
+        NSLog(@"--------------没有商品------------------");
+        return;
+    }
+    
+    NSLog(@"productID:%@", response.invalidProductIdentifiers);
+    NSLog(@"产品付费数量:%ld",[product count]);
+    
+    SKProduct *p = nil;
+    for (SKProduct *pro in product) {
+        NSLog(@"%@", [pro description]);
+        NSLog(@"%@", [pro localizedTitle]);
+        NSLog(@"%@", [pro localizedDescription]);
+        NSLog(@"%@", [pro price]);
+        NSLog(@"%@", [pro productIdentifier]);
+        
+        if([pro.productIdentifier isEqualToString:@"com.immet.meets_golds"]){
+            p = pro;
+        }
+    }
+    SKPayment *payment = [SKPayment paymentWithProduct:p];
+    
+    NSLog(@"发送购买请求");
+    [[SKPaymentQueue defaultQueue] addPayment:payment];
+}
+
+//请求失败
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
+    NSLog(@"------------------错误-----------------:%@", error);
+}
+
+- (void)requestDidFinish:(SKRequest *)request{
+    NSLog(@"------------反馈信息结束-----------------");
+}
+
+
+//监听购买结果
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transaction{
+    for(SKPaymentTransaction *tran in transaction){
+        
+        switch (tran.transactionState) {
+            case SKPaymentTransactionStatePurchased:
+                NSLog(@"交易完成");
+                if (self.canUpdate) {
+                     [self updateVIPInfo];
+                }
+                break;
+            case SKPaymentTransactionStatePurchasing:
+                NSLog(@"商品添加进列表");
+                
+                break;
+            case SKPaymentTransactionStateRestored:
+                NSLog(@"已经购买过商品");
+                
+                break;
+            case SKPaymentTransactionStateFailed:
+                NSLog(@"交易失败：%@",tran.error);
+                
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+//交易结束
+- (void)completeTransaction:(SKPaymentTransaction *)transaction{
+    NSLog(@"交易结束");
+    
+    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+}
+
+
+- (void)dealloc{
+    [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
+}
+//内购接口
+-(void)updateVIPInfo{
+    IAPPurchaseRequest * request =[[IAPPurchaseRequest alloc]init];
+    request.month=@"0";
+    request.gold=@"3000";
+    [SystemAPI IAPPurchaseRequest:request success:^(IAPPurchaseResponse *response) {
+        [self updatePersonalInfo];
+    } fail:^(BOOL notReachable, NSString *desciption) {
+        
     }];
 }
 @end

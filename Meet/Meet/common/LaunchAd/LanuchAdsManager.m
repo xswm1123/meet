@@ -35,7 +35,6 @@ static LanuchAdsManager * _manager;
 {
     self.count=time;
     CGRect f = [UIScreen mainScreen].bounds;
-    NSLog(@"screen size:%@", NSStringFromCGRect(f));
     UIView *v = [[UIView alloc] initWithFrame:f];
     v.backgroundColor = [UIColor whiteColor];
     UIImageView *iv = [[UIImageView alloc] initWithFrame:f];

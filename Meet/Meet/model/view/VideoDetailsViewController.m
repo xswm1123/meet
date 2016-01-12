@@ -57,6 +57,7 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+      [IQKeyboardManager sharedManager].enable=NO;
     [self.tableView registerNib:[UINib nibWithNibName:@"VideoCommnetsListTableViewCell" bundle:nil] forCellReuseIdentifier:VideoCommentsID];
     self.tableView.estimatedRowHeight = 60;
     self.tableView.fd_debugLogEnabled = YES;
@@ -102,6 +103,7 @@
     [SystemAPI GetVideoDetailsRequest:request success:^(GetVideoDetailsResponse *response) {
         self.detailsInfo=[response.data copy];
         self.lb_count.text=[NSString stringWithFormat:@"%@",[response.data objectForKey:@"meili"]];
+        [self.photoIV sd_setImageWithURL:[NSURL URLWithString:[NSString stringWithFormat:@"%@",[response.data objectForKey:@"avatar"]]]];
         if ([[response.data objectForKey:@"title"] isKindOfClass:[NSNull class]]) {
             self.lb_desc.text=@"暂无标题";
         }else{
@@ -150,6 +152,7 @@
 }
 -(void)loadVideoComments{
     GetGiftsCommentsListRequest * commentRequest=[[GetGiftsCommentsListRequest alloc]init];
+    commentRequest.pageSize=@"1000";
     commentRequest.videoId=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"videoId"]];
     [SystemAPI GetGiftsCommentsListRequest:commentRequest success:^(GetGiftsCommentsListResponse *response) {
         self.commentDatas =[NSMutableArray arrayWithArray:(NSArray*)response.data];
@@ -162,8 +165,11 @@
  *  加载礼物的四张图片
  */
 -(void)showGiftImages{
-   
-        
+    for (UIView * view in self.giftListGB.subviews) {
+        if (view.tag<300) {
+            [view removeFromSuperview];
+        }
+    }
         for (int i=0; i<self.giftDatas.count; i++) {
             NSDictionary * dic=self.giftDatas[i];
             UIImageView *imgview=[[UIImageView alloc] initWithFrame:CGRectMake(10+(imageWith+10)*i,30,imageWith,70)];
@@ -212,7 +218,6 @@
     if (!cell) {
         cell=[[VideoCommnetsListTableViewCell alloc]initWithStyle:UITableViewCellStyleDefault reuseIdentifier:VideoCommentsID];
     }
-    
     NSDictionary * dic=[self.commentDatas objectAtIndex:indexPath.row];
     cell.lb_name.text=[NSString stringWithFormat:@"%@",[dic objectForKey:@"nickname"]];
      cell.lb_content.text=[NSString stringWithFormat:@"%@",[dic objectForKey:@"content"]];
@@ -226,14 +231,6 @@
     return self.commentDatas.count;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath{
-//        VideoCommnetsListTableViewCell* cell=(VideoCommnetsListTableViewCell*)[self tableView:tableView cellForRowAtIndexPath:indexPath];
-//        CGSize size=[cell.contentView systemLayoutSizeFittingSize:UILayoutFittingCompressedSize];
-//    
-//        if (size.height<60.0) {
-//            return 60.0;
-//        }else{
-//        return size.height+3;
-//        }
     return [tableView fd_heightForCellWithIdentifier:VideoCommentsID cacheByIndexPath:indexPath configuration:^(VideoCommnetsListTableViewCell* cell) {
         // 配置 cell 的数据源，和 "cellForRow" 干的事一致，比如：
         NSDictionary * dic=[self.commentDatas objectAtIndex:indexPath.row];
@@ -281,8 +278,6 @@
     NSDictionary *userInfo = notification.userInfo;
     CGRect keyboardFrame = [userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
     //2. 计算输入框的坐标
-//    CGRect frame = self.inputView.frame;
-//    frame.origin.y = keyboardFrame.origin.y - self.inputView.frame.size.height;
     //3. 动画地改变坐标
     NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey]doubleValue];
     UIViewAnimationOptions options = [userInfo[UIKeyboardAnimationCurveUserInfoKey]unsignedIntegerValue];
@@ -296,13 +291,10 @@
 
 - (void)keyboardDisappear:(NSNotification *)notification
 {
-//    CGRect frame = self.inputView.frame;
-//    frame.origin.y = self.scrollView.frame.size.height - frame.size.height - self.bottomLayoutGuide.length;
     NSDictionary *userInfo = notification.userInfo;
     NSTimeInterval duration = [userInfo[UIKeyboardAnimationDurationUserInfoKey]doubleValue];
     UIViewAnimationOptions options = [userInfo[UIKeyboardAnimationCurveUserInfoKey]unsignedIntegerValue];
     [UIView animateWithDuration:duration delay:0.0 options:options animations:^{
-//        self.inputView.frame = frame;
         self.bottomDistanceToView.constant=0.0;
          [self updateViewConstraints];
     } completion:nil];
@@ -451,29 +443,31 @@
 }
 -(void)shareAlertView:(ShareAlertView *)alertView didSelectedAtButtonIndex:(NSInteger)buttonIndex{
     //xxTea 加密
-    NSString * key =@"yckjyxgs!@#$%321";
-  const   char * charKey =[key cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
+//    NSString * key =@"yckjyxgs!@#$%321";
+//  const   char * charKey =[key cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
     //url
-    NSString * praUrl=[self.detailsInfo objectForKey:@"videoUrl"];
-    const char * charPraUrl =[praUrl cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
-    char * parResult =encryptxxtea(charPraUrl, charKey);
-    NSString * enPraUrl=[NSString stringWithCString:parResult encoding:NSStringEncodingConversionAllowLossy];
+//    NSString * praUrl=[self.detailsInfo objectForKey:@"videoUrl"];
+//    const char * charPraUrl =[praUrl cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
+//    char * parResult =encryptxxtea(charPraUrl, charKey);
+//    NSString * enPraUrl=[NSString stringWithCString:parResult encoding:NSStringEncodingConversionAllowLossy];
     //screen
-    NSString * praScreen=[self.detailsInfo objectForKey:@"videoUrl"];
-    const char * charPraScreen =[praScreen cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
-    char * parResult2 =encryptxxtea(charPraScreen, charKey);
-    NSString * enPraUrl2=[NSString stringWithCString:parResult2 encoding:NSStringEncodingConversionAllowLossy];
+    NSString * praScreen=[self.detailsInfo objectForKey:@"picUrl"];
+//    const char * charPraScreen =[praScreen cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
+//    char * parResult2 =encryptxxtea(charPraScreen, charKey);
+//    NSString * enPraUrl2=[NSString stringWithCString:parResult2 encoding:NSStringEncodingConversionAllowLossy];
     
-    NSString * videoUrl=[NSString stringWithFormat:@"http://xy.immet.cm/xy/video.jsp?video=%@&pic=%@",enPraUrl,enPraUrl2];
-    NSString * content=@"我在相遇，赶紧来看这逗B小视频吧，猛戳播放！";
+    NSString * videoUrl=[NSString stringWithFormat:@"http://xy.immet.cm/xy/rest/share/video?videoId=%@",[self.infoDic objectForKey:@"videoId"]];
+    NSString * content=[self.detailsInfo objectForKey:@"title"];
     NSString * title =@"相遇";
+    UIImage * videoImage=[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:praScreen]]];
     //wechat
     if (buttonIndex==0) {
         [UMSocialData defaultData].extConfig.wechatSessionData.url = videoUrl;
         [UMSocialData defaultData].extConfig.wechatSessionData.title = title;
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:content image:[UIImage imageNamed:@"icon_180.png"] location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatSession] content:content image:videoImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
+                [self shareCallBackAction];
             }
         }];
 
@@ -481,9 +475,10 @@
     //sina
     if (buttonIndex==1) {
         UMSocialUrlResource * resource =[[UMSocialUrlResource alloc]initWithSnsResourceType:UMSocialUrlResourceTypeVideo url:videoUrl];
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:content image:[UIImage imageNamed:@"icon_180.png"] location:nil urlResource:resource presentedController:self completion:^(UMSocialResponseEntity *response){
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToSina] content:content image:videoImage location:nil urlResource:resource presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
+                [self shareCallBackAction];
             }
         }];
         [UMSocialSnsPlatformManager getSocialPlatformWithName:UMShareToSina].snsClickHandler(self,[UMSocialControllerService defaultControllerService],YES);
@@ -492,9 +487,10 @@
     if (buttonIndex==2) {
         [UMSocialData defaultData].extConfig.qqData.url = videoUrl;
         [UMSocialData defaultData].extConfig.qqData.title = title;
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToQQ] content:content image:[UIImage imageNamed:@"icon_180.png"] location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToQQ] content:content image:videoImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
+                [self shareCallBackAction];
             }
         }];
     }
@@ -502,12 +498,24 @@
     if (buttonIndex==3) {
         [UMSocialData defaultData].extConfig.wechatTimelineData.url = videoUrl;
         [UMSocialData defaultData].extConfig.wechatTimelineData.title = content;
-        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:nil image:[UIImage imageNamed:@"icon_180.png"] location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+        [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:nil image:videoImage location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
             if (response.responseCode == UMSResponseCodeSuccess) {
                 NSLog(@"分享成功！");
+                [self shareCallBackAction];
             }
         }];
-
     }
+}
+/**
+ *  分享回调
+ */
+-(void)shareCallBackAction{
+    ShareCallBackRequest * request =[[ShareCallBackRequest alloc]init];
+    [SystemAPI ShareCallBackRequest:request success:^(ShareCallBackResponse *response) {
+        LMUserInfo * user=[[LMUserInfo alloc]initWithDictionary:response.data];
+        [ShareValue shareInstance].userInfo=user;
+    } fail:^(BOOL notReachable, NSString *desciption) {
+        
+    }];
 }
 @end

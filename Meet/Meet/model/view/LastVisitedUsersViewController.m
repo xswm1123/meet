@@ -25,6 +25,7 @@
     [self.tableView registerNib:[UINib nibWithNibName:@"NearByListTableViewCell" bundle:nil] forCellReuseIdentifier:NearByCell];
     [self loadData];
     [ShareValue shareInstance].lastVisitCount=[NSNumber new];
+    [ShareValue shareInstance].lastVisitMessage=[NSNumber new];
 }
 -(void)loadData{
     GetLastVisitUsersRequest * request=[[GetLastVisitUsersRequest alloc]init];
@@ -32,6 +33,12 @@
                           success:^(GetLastVisitUsersResponse *response) {
                               self.peopleArr =[NSArray arrayWithArray:(NSArray*)response.data];
                               [self.tableView reloadData];
+//                              NSDateFormatter * frm=[[NSDateFormatter alloc]init];
+//                              [frm setDateFormat:@"yyyy-MM-dd hh:mm:ss"];
+//                              NSDate * date =[NSDate new];
+//                              NSString * dateNew=[frm stringFromDate:date];
+                              NSDictionary * dic =[self.peopleArr firstObject];
+                              [ShareValue shareInstance].lastVisitDate=dic[@"time"];
                                 } fail:^(BOOL notReachable, NSString *desciption) {
                                     [self.tableView reloadData];
                                 }];
@@ -65,12 +72,14 @@
             names=[NSString stringWithFormat:@"%@%@",cell.name,@"\U0000e617"];
             NSMutableAttributedString* str=[[NSMutableAttributedString alloc]initWithString:names];
             [str addAttribute:NSForegroundColorAttributeName value:[UIColor whiteColor] range:NSMakeRange(0, cell.name.length)];
+            [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, cell.name.length)];
             [str addAttribute:NSForegroundColorAttributeName value:iconBlue range:NSMakeRange(cell.name.length, str.length-cell.name.length)];
             cell.lb_name.attributedText=str;
         }else{
             names=[NSString stringWithFormat:@"%@%@",cell.name,@"\U0000e616"];
             NSMutableAttributedString* str=[[NSMutableAttributedString alloc]initWithString:names];
             [str addAttribute:NSForegroundColorAttributeName value:[UIColor whiteColor] range:NSMakeRange(0, cell.name.length)];
+            [str addAttribute:NSFontAttributeName value:[UIFont systemFontOfSize:16] range:NSMakeRange(0, cell.name.length)];
             [str addAttribute:NSForegroundColorAttributeName value:iconRed range:NSMakeRange(cell.name.length, str.length-cell.name.length)];
             cell.lb_name.attributedText=str;
         }

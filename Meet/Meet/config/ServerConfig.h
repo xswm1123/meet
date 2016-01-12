@@ -25,6 +25,7 @@
  */
 //测试环境   com.brant.imdelivery   com.doone.beeTheOne 138185888802 811202
 #define BASE_SERVERLURL @"http://xy.immet.cm/"
+//#define BASE_SERVERLURL @"http://192.168.2.102:8080/"
 //生产环境
 //#define BASE_SERVERLURL @"http://120.55.75.55:8080/"
 
@@ -55,10 +56,10 @@
 #define GetVideoComments @"xy/rest/hall/getVideoComment"//获得视频评论
 #define GetVideoDetails @"xy/rest/hall/getVideoDetail"//获得视频详情
 #define GetCanSendGift @"xy/rest/personal/inner/getMemberItem"//获得可以来赠送的礼物
-#define GetVideoList @"xy/rest/hall/getVideoList"//获得用户上传的视频列表
+#define GetVideoList @"xy/rest/hall/getVideoListByCategoryId"//获得用户上传的视频列表
 #define GetGiftToStores @"xy/rest/store/getStoreItem"//店铺获得的礼物
 #define SendGiftToStore @"xy/rest/store/inner/giveItemForStore"//给商家送礼物
-#define SendGiftToPerson @"xy/rest/inner/giveItemForMember"//送礼物给个人
+#define SendGiftToPerson @"xy/rest/personal/inner/giveItemForMember"//送礼物给个人
 #define GetStoreCommentList @"xy/rest/store/getStoreComment"//获得商家评论列表
 #define CommentStore @"xy/rest/store/inner/addStoreComment"//店铺评论
 #define CollectStore @"xy/rest/store/inner/collectStore"//收藏店铺
@@ -100,7 +101,7 @@
 #define AgreeGroupApply @"xy/rest/xiangyu/inner/agreeGroupValid"//同意群组申请
 #define AgreeFriendApply @"xy/rest/xiangyu/inner/agreeFriendValid"//同意好友申请
 #define GetMyCollectedStores @"xy/rest/personal/inner/getCollectStore"//获得我收藏的店铺列表
-#define GetMyVideos @"xy/rest/personal/getVideoByMemberId"//获得我的视频列表
+#define GetMyVideos @"xy/rest/personal/inner/getVideoByMemberId"//获得我的视频列表
 #define DeleteMyVideo @"xy/rest/personal/inner/deleteVideo"//删除视频
 #define UploadHomePagePics @"xy/rest/personal/inner/uploadPic"//上传个人相册
 #define GetPromotion @"xy/rest/find/inner/getRecommendNum"//获得推广的信息
@@ -115,6 +116,7 @@
 #define ModifyPassword @"xy/rest/personal/inner/updatePwd"//修改密码
 #define GetMyFriendCircle @"xy/rest/find/inner/getMyCircle"//获取我的个人好友圈
 #define DeleteCirclePost @"xy/rest/personal/inner/deleteCircle"//删除朋友圈
+#define GetNearlyVisitCount @"xy/rest/find/inner/getCountNearbyViewMember"//获取最新访客数
 //商城中心
 #define GetMallCategory @"xy/rest/find/getItemCategoryList"//获取商品类目
 #define GetItemById @"xy/rest/find/getItem"//根据ID获取商品类目
@@ -127,12 +129,32 @@
 //支付
 #define CreatePayOrder @"xy/rest/pay/inner/addTradeOrder"//生成支付订单
 #define CreateWeChatPrePay @"xy/rest/pay/weixin_notify"//生成微支付预支付订单
+//个推
+#define UpdateGetuiCid @"xy/rest/personal/inner/changeClientId"//更新个推CID
+//内购临时接口
+#define IAPPurchase @"xy/rest/pay/inner/paySuccess"//
 /**
- *  微支付接口地址：
- http://xy.immet.cm/xy/rest/pay/weixin_notify
- 参数：orderId订单ID order_price价格product_name产品名 userId用户ID
- 请求方法：GET
-*/
+ *  一期增加及修改
+ */
+#define GetIndexCategory @"xy/rest/hall/getVideoCategoryList"//获得主页类目
+#define GetIndexVideoList @"xy/rest/hall/getVideoListByCategoryId"//根据类目获得视频列表
+#define DeleteCircleComment @"xy/rest/find/inner/deleteCircleComment"//删除朋友圈评论
+/**
+ *  第三方登录有关
+ */
+#define Islogin @"xy/rest/personal/isLogin" //判断第三方是否登录
+#define RegisterExtern @"xy/rest/personal/registerExtern"//注册第三方登录
+#define BlindMobile @"xy/rest/personal/inner/bindMobile"//绑定手机
+#define BlindExtern @"xy/rest/personal/inner/bindExtern"//绑定第三方
+/**
+ *  约吧
+ */
+#define GetDatingData @"xy/rest/find/inner/getYuebaPage"//约吧
+#define PublishDating @"xy/rest/find/inner/publishYueba"//发布约吧
+/**
+ *  分享回调
+ */
+#define ShareCallBack @"xy/rest/personal/inner/shareCallback"
 /**
  *  定义机器、机型、系统的配置
  */
@@ -171,11 +193,16 @@
 //百度统计SDK
 #define BaiDu_statistics @"4de65c6e3b"
 //百度地图
-#define BaiduMapKey @"bcnVr9sWUGGegvnzPwpfCt1E" //com.immet.meet
+//#define BaiduMapKey @"bcnVr9sWUGGegvnzPwpfCt1E" //com.immet.meet 企业版本
+#define BaiduMapKey @"qBwFnu4Myl1ZET1tWvOCofVm" //com.immet.meets AppStore
 //个推
-#define GeTui_kAppId           @"BnpPPhUpyg9DZWgGR9pqF7"
-#define GeTui_kAppKey          @"Ew5InGPblV8HK328hOnLY"
-#define GeTui_kAppSecret       @"y4uj2XjPCEAVw6b2ATL9H8"
+#define GeTui_kAppId           @"sMQ6Urvq5I9glrLfkPRas4"
+#define GeTui_kAppKey          @"7kNxJmGvT1757cM0HBjd84"
+#define GeTui_kAppSecret       @"t2AJVNtTAfAXhHBiEjHiqA"
+/**
+ *  极光推送
+ */
+#define JpushKey @"c1d260b352b9a1e69bc26022"
 /**
  *  微信支付帐号：
  *
@@ -185,12 +212,12 @@
  *  通知等ID
  */
 #define NOTIFICATION_CITY_UPDATED @"NOTIFICATION_CITY_UPDATED"
-/**
- *  分享
- */
+#define NOTIFICATION_UNREAD_SYSTEMMESSAGE @"NOTIFICATION_UNREAD_SYSTEMMESSAGE"
+#define NOTIFICATION_UNREAD_LASTVISITMESSAGE @"NOTIFICATION_UNREAD_LASTVISITMESSAGE"
+#define NOTIFICATION_UNREAD_CIRCLEMESSAGE @"NOTIFICATION_UNREAD_CIRCLEMESSAGE"
+#define NOTIFICATION_POST_MESSAGE @"NOTIFICATION_POST_MESSAGE"
 /**
  *  相遇，比陌陌更懂你！我在相遇，相遇号：10080.快来加入我们吧！http:www.immet.cm
  */
 #define UmengShareContent ([NSString stringWithFormat:@"相遇，比陌陌更懂你！我在相遇，相遇号：%@.快来加入我们吧！http:www.immet.cm",[ShareValue shareInstance].userInfo.meetid])
-
 #endif

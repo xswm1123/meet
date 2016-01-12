@@ -31,22 +31,42 @@ static NSUInteger count=60;
     self.summitBtn.layer.shadowColor=TempleColor.CGColor;
     self.summitBtn.layer.shadowRadius=0;
     self.summitBtn.layer.shadowOpacity=0.6;
+    if (self.blind.length>0) {
+        self.navigationItem.title=self.blind;
+    }
 }
 - (IBAction)submmitAction:(id)sender {
     if ([self isReadyToSubmmit]) {
-        [MBProgressHUD showHUDAddedTo:self.view.window animated:YES];
-        ForgetPasswordRequest * request=[[ForgetPasswordRequest alloc]init];
-        request.mobile=self.tf_phoneNumber.text;
-        request.code=self.tf_checkCode.text;
-        request.password=self.tf_setPassword.text;
-        [SystemAPI ForgetPasswordRequest:request success:^(ForgetPasswordResponse *response) {
-            [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
-            [MBProgressHUD showSuccess:response.message toView:ShareAppDelegate.window];
-            [self.navigationController popViewControllerAnimated:YES];
-        } fail:^(BOOL notReachable, NSString *desciption) {
-            [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
-            [MBProgressHUD showError:desciption toView:self.view.window];
-        }];
+        if (self.blind.length>0) {
+            //绑定手机
+            BlindMobileRequest * request =[[BlindMobileRequest alloc]init];
+            request.mobile=self.tf_phoneNumber.text;
+            request.code=self.tf_checkCode.text;
+            request.password=self.tf_setPassword.text;
+            [SystemAPI BlindMobileRequest:request success:^(BlindMobileResponse *response) {
+                [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+                [MBProgressHUD showSuccess:response.message toView:ShareAppDelegate.window];
+                [self.navigationController popViewControllerAnimated:YES];
+            } fail:^(BOOL notReachable, NSString *desciption) {
+                [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+                [MBProgressHUD showError:desciption toView:self.view.window];
+            }];
+        }else{
+            //忘记密码
+            [MBProgressHUD showHUDAddedTo:self.view.window animated:YES];
+            ForgetPasswordRequest * request=[[ForgetPasswordRequest alloc]init];
+            request.mobile=self.tf_phoneNumber.text;
+            request.code=self.tf_checkCode.text;
+            request.password=self.tf_setPassword.text;
+            [SystemAPI ForgetPasswordRequest:request success:^(ForgetPasswordResponse *response) {
+                [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+                [MBProgressHUD showSuccess:response.message toView:ShareAppDelegate.window];
+                [self.navigationController popViewControllerAnimated:YES];
+            } fail:^(BOOL notReachable, NSString *desciption) {
+                [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+                [MBProgressHUD showError:desciption toView:self.view.window];
+            }];
+        }
     }
 }
 - (IBAction)getCheckCodeAction:(id)sender {

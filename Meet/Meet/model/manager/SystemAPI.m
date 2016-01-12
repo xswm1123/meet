@@ -497,11 +497,11 @@
     } class:[UploadHomePagePicsResponse class]];
 }
 +(void)GetPromotionRequest:(GetPromotionRequest *)request success:(void(^)(GetPromotionResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
-    [X_BaseAPI getHttpRequest:request apiPath:GetPromotion Success:^(X_BaseHttpResponse *response) {
-        success((GetPromotionResponse *)response);
-    } fail:^(BOOL NotReachable, NSString *desciption) {
-        fail(NotReachable,desciption);
-    } class:[GetPromotionResponse class]];
+    [X_BaseAPI getHttpRequest:request apiPath:GetPromotion Success:^(id data) {
+        success(data);
+    } fail:^(BOOL NotReachable, NSString *descript) {
+        fail(NotReachable,descript);
+    }];
 }
 +(void)GiveZanRequest:(GiveZanRequest *)request success:(void(^)(GiveZanResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
     [X_BaseAPI getHttpRequest:request apiPath:GiveZan Success:^(X_BaseHttpResponse *response) {
@@ -579,6 +579,96 @@
     } fail:^(BOOL NotReachable, NSString *desciption) {
         fail(NotReachable,desciption);
     } class:[ReportUserResponse class]];
-
+}
++(void)GetNearlyVisitCountRequest:(GetNearlyVisitCountRequest *)request success:(void(^)(id data))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI getHttpRequest:request apiPath:GetNearlyVisitCount Success:^(id data) {
+        success(data);
+    } fail:^(BOOL NotReachable, NSString *descript) {
+         fail(NotReachable,descript);
+    }];
+}
++(void)UpdateGetuiCidRequest:(UpdateGetuiCidRequest *)request success:(void(^)(UpdateGetuiCidResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:UpdateGetuiCid Success:^(X_BaseHttpResponse *response) {
+        success((UpdateGetuiCidResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[UpdateGetuiCidResponse class]];
+}
++(void)GetIndexCategoryRequest:(GetIndexCategoryRequest *)request success:(void(^)(GetIndexCategoryResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI getHttpRequest:request apiPath:GetIndexCategory Success:^(X_BaseHttpResponse *response) {
+        success((GetIndexCategoryResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[GetIndexCategoryResponse class]];
+}
++(void)GetIndexVideoListRequest:(GetIndexVideoListRequest *)request success:(void(^)(GetIndexVideoListResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI getHttpRequest:request apiPath:GetIndexVideoList Success:^(X_BaseHttpResponse *response) {
+        success((GetIndexVideoListResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[GetIndexVideoListResponse class]];
+}
++(void)IAPPurchaseRequest:(IAPPurchaseRequest *)request success:(void(^)(IAPPurchaseResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:IAPPurchase Success:^(X_BaseHttpResponse *response) {
+        success((IAPPurchaseResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[IAPPurchaseResponse class]];
+}
++(void)DeleteCircleCommentRequest:(DeleteCircleCommentRequest *)request success:(void(^)(DeleteCircleCommentResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:DeleteCircleComment Success:^(X_BaseHttpResponse *response) {
+        success((DeleteCircleCommentResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[DeleteCircleCommentResponse class]];
+}
++(void)IsLoginReqeust:(IsLoginReqeust *)request success:(void(^)(id data)) success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI getHttpRequest:request apiPath:Islogin Success:^(id data) {
+        success(data);
+    } fail:^(BOOL NotReachable, NSString *descript) {
+        fail(NotReachable,descript);
+    }];
+}
++(void)RegisterExternRequest:(RegisterExternRequest *)request success:(void(^)(RegisterExternResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:RegisterExtern Success:^(X_BaseHttpResponse *response) {
+        success((RegisterExternResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[RegisterExternResponse class]];
+}
++(void)BlindMobileRequest:(BlindMobileRequest *)request success:(void(^)(BlindMobileResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:BlindMobile Success:^(X_BaseHttpResponse *response) {
+        success((BlindMobileResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[BlindMobileResponse class]];
+}
++(void)BlindExternRequest:(BlindExternRequest *)request success:(void(^)(BlindExternResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:BlindExtern Success:^(X_BaseHttpResponse *response) {
+        success((BlindExternResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[BlindExternResponse class]];
+}
++(void)GetDatingDataRequest:(GetDatingDataRequest *)request success:(void(^)(GetDatingDataResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI getHttpRequest:request apiPath:GetDatingData Success:^(X_BaseHttpResponse *response) {
+        success((GetDatingDataResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[GetDatingDataResponse class]];
+}
++(void)PublishDatingRequest:(PublishDatingRequest *)request success:(void(^)(PublishDatingResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:PublishDating Success:^(X_BaseHttpResponse *response) {
+        success((PublishDatingResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[PublishDatingResponse class]];
+}
++(void)ShareCallBackRequest:(ShareCallBackRequest *)request success:(void(^)(ShareCallBackResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI postHttpRequest:request apiPath:ShareCallBack Success:^(X_BaseHttpResponse *response) {
+        success((ShareCallBackResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[ShareCallBackResponse class]];
 }
 @end

@@ -5,7 +5,7 @@
 //  Created by Anita Lee on 15/6/26.
 //  Copyright (c) 2015年 Anita Lee. All rights reserved.
 //
-
+#ifdef __OBJC__
 #import "X_BaseAPI.h"
 #import "NSDictionary+XNSDictionaryToNSObject.h"
 #import "ServerConfig.h"
@@ -13,6 +13,10 @@
 #import "JSONKit.h"
 #import "NSString+URLEncode.h"
 #import <CommonCrypto/CommonDigest.h>
+#import "BaseViewController.h"
+//xxtea加密
+#include "XXTEA.h"
+#endif
 
 @interface X_BaseAPI (p)
 +(AFHTTPRequestOperationManager *)manager;
@@ -84,7 +88,8 @@
      *  根据需求这里设置响应方式和请求的header
      */
     manager.responseSerializer=[AFJSONResponseSerializer serializer];
-
+    [ manager.requestSerializer setValue:@"new_version" forHTTPHeaderField:@"version"];
+    [ manager.requestSerializer setValue:[X_BaseAPI enToekn] forHTTPHeaderField:@"token"];
     AFHTTPRequestOperation* op=
     [manager POST:path parameters:tdict success:^(AFHTTPRequestOperation *operation, id responseObject)
      {
@@ -104,7 +109,7 @@
          }
      } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
          NSLog(@"%@", [error description]);
-         fail(YES,@"网络不给力");
+         fail(YES,@"访问出错,请稍后重试");
      }];
     [op start];
 }
@@ -121,6 +126,7 @@
     if (!responseClass) {
         responseClass = [X_BaseHttpResponse class];
     }
+
     NSDictionary *tdict = request.lkDictionary;
     NSString *paramString = [X_BaseAPI stringCreateJsonWithObject:tdict ];
     NSLog(@"类型:%@", @"GET");
@@ -133,16 +139,17 @@
      *  根据需求这里设置响应方式和请求的header
      */
     manager.responseSerializer=[AFJSONResponseSerializer serializer];
-    
+    [ manager.requestSerializer setValue:@"new_version" forHTTPHeaderField:@"version"];
+    [ manager.requestSerializer setValue:[X_BaseAPI enToekn] forHTTPHeaderField:@"token"];
     AFHTTPRequestOperation* op=
     [manager GET:path parameters:tdict success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSDictionary *responseString = (NSDictionary *)responseObject;
         NSLog(@"responseString:%@",responseString);
             if (responseObject) {
                 NSObject *object = [responseObject objectByClass:responseClass];
-                X_BaseHttpResponse * response = (X_BaseHttpResponse *) object;
+                    X_BaseHttpResponse * response = (X_BaseHttpResponse *) object;
                 if ([DEFINE_SUCCESSCODE isEqualToString:response.code]) {
-                    sucess((X_BaseHttpResponse*)object);
+                         sucess((X_BaseHttpResponse*)object);
                 }else{
                     fail(NO,response.message);
                     NSLog(@"message:%@",response.message);
@@ -152,7 +159,46 @@
             }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%@", [error description]);
-        fail(YES,@"网络不给力");
+        fail(YES,@"访问出错,请稍后重试");
+    }];
+    [op start];
+}
+/**
+ *  GET返回ID  DATA
+ */
++(void)getHttpRequest:(X_BaseHttpRequest *)request apiPath:(NSString *)path Success:(void (^)(id data))sucess fail:(void (^)(BOOL NotReachable,NSString *descript))fail{
+    NSDictionary *tdict = request.lkDictionary;
+    NSString *paramString = [X_BaseAPI stringCreateJsonWithObject:tdict ];
+    NSLog(@"类型:%@", @"GET");
+    NSLog(@"路径:%@", path);
+    NSLog(@"参数:%@", paramString);
+    path = [NSString stringWithFormat:@"%@?",path];
+    request.requestPath = path;
+    AFHTTPRequestOperationManager *manager = X_BaseAPI.manager;
+    /**
+     *  根据需求这里设置响应方式和请求的header
+     */
+    manager.responseSerializer=[AFJSONResponseSerializer serializer];
+    [ manager.requestSerializer setValue:@"new_version" forHTTPHeaderField:@"version"];
+    [ manager.requestSerializer setValue:[X_BaseAPI enToekn] forHTTPHeaderField:@"token"];
+    AFHTTPRequestOperation* op=
+    [manager GET:path parameters:tdict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+        NSDictionary *responseString = (NSDictionary *)responseObject;
+        NSLog(@"responseString:%@",responseString);
+        if (responseObject) {
+            NSString * code =[NSString stringWithFormat:@"%@",[responseString objectForKey:@"code"]];
+            if ([DEFINE_SUCCESSCODE isEqualToString:code]) {
+                sucess(responseObject);
+            }else{
+                fail(NO,[responseString objectForKey:@"message"]);
+                NSLog(@"message:%@",[responseString objectForKey:@"message"]);
+            }
+        }else{
+            fail(NO,@"服务器返回数据为空");
+        }
+    } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
+        NSLog(@"%@", [error description]);
+        fail(YES,@"访问出错,请稍后重试");
     }];
     [op start];
 }
@@ -211,7 +257,7 @@
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%@", [error description]);
-        fail(YES,@"网络不给力");
+        fail(YES,@"访问出错,请稍后重试");
     }];
     [op start];
 }
@@ -225,7 +271,8 @@
      *  根据需求这里设置响应方式和请求的header
      */
     manager.responseSerializer=[AFJSONResponseSerializer serializer];
-    
+    [ manager.requestSerializer setValue:@"new_version" forHTTPHeaderField:@"version"];
+    [ manager.requestSerializer setValue:[X_BaseAPI enToekn] forHTTPHeaderField:@"token"];
     AFHTTPRequestOperation* op=[manager POST:URL_UPLOADFILES parameters:@{fileName:@"fileName"} constructingBodyWithBlock:^(id<AFMultipartFormData> formData) {
         if (fileData!=nil) {
             [formData appendPartWithFileData :fileData name:name fileName:fileName mimeType:mimeType];
@@ -246,14 +293,14 @@
         }
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         NSLog(@"%@", [error description]);
-        fail(YES,@"网络不给力");
+        fail(YES,@"访问出错,请稍后重试");
     }];
     [op start];
 }
 /**
  *  下载文件
  */
-+(void)downLoadFilesWithURL:(NSString *)path Success:(void (^)(X_BaseHttpResponse * response))sucess fail:(void (^)(BOOL, NSString * description))fail{
++(void)downLoadFilesWithURL:(NSString *)path Success:(void (^)(X_BaseHttpResponse * response,NSURL *filePath))sucess fail:(void (^)(BOOL, NSString * description))fail{
     NSURLSessionConfiguration *configuration = [NSURLSessionConfiguration defaultSessionConfiguration];
     AFURLSessionManager *manager = [[AFURLSessionManager alloc] initWithSessionConfiguration:configuration];
     NSURL *URL = [NSURL URLWithString:path];
@@ -264,7 +311,7 @@
     } completionHandler:^(NSURLResponse *response, NSURL *filePath, NSError *error) {
         NSLog(@"File downloaded to: %@", filePath);
         X_BaseHttpResponse* XResponse=[[X_BaseHttpResponse alloc]init];
-        sucess(XResponse);
+        sucess(XResponse,filePath);
     }];
     [downloadTask resume];
 }
@@ -273,4 +320,30 @@
  */
 +(void)uploadVideo:(NSData *)fileData name:(NSString *)name fileName:(NSString *)fileName mimeType:(NSString *)mimeType Success:(void (^)(X_BaseHttpResponse *))sucess fail:(void (^)(BOOL NotReachable,NSString *descript))fail{
 }
++(NSString *)enToekn{
+    NSString * memberId=[NSString stringWithFormat:@"%@",[ShareValue shareInstance].userInfo.id];
+    NSString * session =[ShareValue shareInstance].session;
+    if (session.length>0) {
+        NSDate * now=[NSDate new];
+        NSDateFormatter  * frm =[[NSDateFormatter alloc]init];
+        [frm setDateFormat:@"yyMMddHHmmss"];
+        NSString * clientDate=[frm stringFromDate:now];
+        NSInteger client =clientDate.integerValue;
+        NSInteger  count =client+[ShareValue shareInstance].timeDiff.integerValue;
+        NSString * timeStamp =[NSString stringWithFormat:@"%ld",count*1000];
+        NSString * newToken =[NSString stringWithFormat:@"%@|%@|%@",memberId,session,timeStamp];
+        //jiami
+        //xxTea 加密
+        NSString * key =@"yckjyxgs!@#$%321";
+        const   char * charKey =[key cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
+        
+        const char * charPraUrl =[newToken cStringUsingEncoding:NSStringEncodingConversionAllowLossy];
+        char * parResult =encryptxxtea(charPraUrl, charKey);
+        NSString * enPraUrl=[NSString stringWithCString:parResult encoding:NSStringEncodingConversionAllowLossy];
+         return enPraUrl;
+    }
+    
+   return @"";
+}
+
 @end

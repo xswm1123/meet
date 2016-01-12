@@ -8,14 +8,16 @@
 
 #import "StoreManagerViewController.h"
 #import "ExchangeCityViewController.h"
+#import "ChooseAddressViewController.h"
 
-@interface StoreManagerViewController ()<UINavigationControllerDelegate,ZYQAssetPickerControllerDelegate,SelectCityDelegate,UIActionSheetDelegate>
+@interface StoreManagerViewController ()<UINavigationControllerDelegate,ZYQAssetPickerControllerDelegate,SelectCityDelegate,UIActionSheetDelegate,ChooseAddressDelegate>
 @property (weak, nonatomic) IBOutlet UITextField *tf_name;
 @property (weak, nonatomic) IBOutlet UIScrollView *imageBGScrollView;
 @property (weak, nonatomic) IBOutlet UILabel *lb_address;
 @property (weak, nonatomic) IBOutlet UILabel *lb_storeType;
 
 @property (weak, nonatomic) IBOutlet UITextField *tf_avaregCost;
+@property (weak, nonatomic) IBOutlet UILabel *lb_detailAddress;
 @property (weak, nonatomic) IBOutlet UITextField *tf_phoneNumber;
 @property (weak, nonatomic) IBOutlet UITextField *tf_detailAddress;
 @property (weak, nonatomic) IBOutlet UIPlaceHolderTextView *tv_desc;
@@ -31,8 +33,10 @@
 @property (nonatomic,strong) NSMutableArray * imageIVs;
 @property (nonatomic,strong) NSMutableArray * imageUrls;
 @property (nonatomic,assign) NSInteger  imageCount;
-@end
 
+@property (nonatomic,strong) NSArray * picUrls;
+@end
+#define imageWith ((DEVCE_WITH-50)/4)
 @implementation StoreManagerViewController
 
 - (void)viewDidLoad {
@@ -45,6 +49,8 @@
         la.text=@"\U0000e639";
     }
     self.tv_desc.placeholder=@"请输入商家描述...";
+    self.lb_detailAddress.adjustsFontSizeToFitWidth=YES;
+    
     NSAttributedString * str=[[NSAttributedString alloc]initWithString:@"\U0000e630" attributes:@{NSFontAttributeName:[UIFont fontWithName:iconFont size:60],NSForegroundColorAttributeName:[UIColor lightGrayColor]}];
     self.photoBtn =[[UIButton alloc]initWithFrame:CGRectMake(10, 5, 80, 80)];
     [self.photoBtn setAttributedTitle:str forState:UIControlStateNormal];
@@ -65,6 +71,8 @@
     GetMyStoreDetailsRequest * request  =[[GetMyStoreDetailsRequest alloc]init];
     [SystemAPI GetMyStoreDetailsRequest:request success:^(GetMyStoreDetailsResponse *response) {
         self.infoDic=[NSDictionary dictionaryWithDictionary:response.data];
+        NSString * urls =[response.data objectForKey:@"picUrl"];
+        self.picUrls=[NSArray arrayWithArray:[urls componentsSeparatedByString:@","]];
         [self configData];
     } fail:^(BOOL notReachable, NSString *desciption) {
         
@@ -76,8 +84,43 @@
     self.lb_storeType.text=[self.infoDic objectForKey:@"categoryName"];
     self.tf_avaregCost.text=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"price"]];
     self.tf_phoneNumber.text=[self.infoDic objectForKey:@"phone"];
-    self.tf_detailAddress.text=[self.infoDic objectForKey:@"address"];
+    self.lb_detailAddress.text=[self.infoDic objectForKey:@"address"];
     self.tv_desc.text=[self.infoDic objectForKey:@"description"];
+    [self showAlPictures];
+}
+-(void)showAlPictures{
+    dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+        
+        for (int i=0; i<self.picUrls.count; i++) {
+            UIImageView *imgview=[[UIImageView alloc] initWithFrame:CGRectMake(10+(imageWith+10)*(i),5,imageWith,80)];
+            
+            dispatch_async(dispatch_get_main_queue(), ^{
+                [imgview sd_setImageWithURL:[NSURL URLWithString:self.picUrls[i]] placeholderImage:placeHolder];
+                [self.imageBGScrollView addSubview:imgview];
+                [self.postImages addObject:imgview.image];
+                [self.imageIVs addObject:imgview];
+                self.imageBGScrollView.contentSize=CGSizeMake(10+(imageWith+10)*(self.imageIVs.count)+90, 90);
+                //添加删除长按手势
+                imgview.userInteractionEnabled=YES;
+                UILongPressGestureRecognizer* longPress=[[UILongPressGestureRecognizer alloc]initWithTarget:self action:@selector(longPress:)];
+                [imgview addGestureRecognizer:longPress];
+                
+                UITapGestureRecognizer * tap=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(removeSubviewsBtns)];
+                [imgview addGestureRecognizer:tap];
+                if (self.picUrls.count-1==i) {
+                    if (self.imageIVs.count==30) {
+                        self.photoBtn.hidden=YES;
+                    }else{
+                        self.photoBtn.hidden=NO;
+                        NSInteger k=self.imageIVs.count;
+                        self.photoBtn.frame=CGRectMake(10+(imageWith+10)*(k),5,80,80);
+                    }
+                    
+                }
+            });
+        }
+    });
+
 }
 /**
  *  获得商家类目
@@ -90,6 +133,24 @@
     } fail:^(BOOL notReachable, NSString *desciption) {
         
     }];
+}
+/**
+ *  选择地址
+ *
+ *  @param sender
+ */
+- (IBAction)chooseAddress:(id)sender {
+    [self performSegueWithIdentifier:@"address" sender:nil];
+}
+#pragma chooseAddressDelegate
+-(void)getAddressFromMap:(NSString *)address{
+    self.lb_detailAddress.text=address;
+}
+-(void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender{
+    if ([segue.identifier isEqualToString:@"address"]) {
+        ChooseAddressViewController * vc=[segue destinationViewController];
+        vc.delegate=self;
+    }
 }
 - (IBAction)chooseCity:(id)sender {
     UIStoryboard * sb =[UIStoryboard storyboardWithName:@"Main" bundle:nil];
@@ -132,12 +193,10 @@
     
     [self presentViewController:picker animated:YES completion:NULL];
 }
-#define imageWith ((DEVCE_WITH-50)/4)
+
 #pragma mark - ZYQAssetPickerController Delegate
 -(void)assetPickerController:(ZYQAssetPickerController *)picker didFinishPickingAssets:(NSArray *)assets{
     NSInteger m=self.imageIVs.count;
-    
-    
     dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
         
         for (int i=0; i<assets.count; i++) {
@@ -244,7 +303,7 @@
     [formatter setDateFormat:@"yyMMddHHmmss"];
     NSString *fileName = [NSString stringWithFormat:@"%@IMG_%@",self.title,[formatter stringFromDate:now]];
     UIImageView * imv=self.imageIVs[self.imageCount-1];
-    UIImage * upImage=[ImageInfo makeThumbnailFromImage:imv.image scale:0.5];
+    UIImage * upImage=[ImageInfo makeThumbnailFromImage:imv.image scale:1.0];
     ImageInfo * details=[[ImageInfo alloc]initWithImage:upImage];
     [X_BaseAPI uploadFile:details.fileData name:fileName fileName:details.fileName mimeType:details.mimeType Success:^(X_BaseHttpResponse * response) {
         NSArray * arr=(NSArray*)response.data;
@@ -253,15 +312,12 @@
         --self.imageCount;
         if (self.imageCount>0) {
             [self uploadPostImages];
-            
         }else{
             [self createGroup];
         }
     } fail:^(BOOL NotReachable, NSString *descript) {
         
     } class:[UploadFilesResponse class]];
-    
-    
 }
 -(void)createGroup{
     /**
@@ -276,7 +332,10 @@
             urls=[urls stringByAppendingString:[NSString stringWithFormat:@",%@",[self.imageUrls objectAtIndex:i]]];
         }
     }
-    request.id=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"storeId"]];
+//    request.id=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"storeId"]];
+    if (self.infoDic) {
+        request.storeId=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"storeId"]];
+    }
     if (self.infoDic) {
         request.areaId=[NSString stringWithFormat:@"%@",[self.infoDic objectForKey:@"areaId"]];
     }else{
@@ -290,12 +349,13 @@
         request.categoryId=self.lb_storeType.tag;
     }
     request.price=[self.tf_avaregCost.text doubleValue];
-    request.address=self.tf_detailAddress.text;
+    request.address=self.lb_detailAddress.text;
     request.desc=self.tv_desc.text;
     request.picUrl=urls;
     [SystemAPI CreateMyStoreRequest:request success:^(CreateMyStoreResponse *response) {
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
         [MBProgressHUD showSuccess:response.message toView:self.view];
+        [self.navigationController popViewControllerAnimated:YES];
     } fail:^(BOOL notReachable, NSString *desciption) {
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
         [MBProgressHUD showError:desciption toView:self.view];
@@ -319,8 +379,8 @@
         [MBProgressHUD showError:@"请输入人均消费！" toView:self.view.window];
         return NO;
     }
-    if (self.tf_detailAddress.text.length==0) {
-        [MBProgressHUD showError:@"请输入详细地址！" toView:self.view.window];
+    if ([self.lb_detailAddress.text isEqualToString:@"请选择商家详细地址"]) {
+        [MBProgressHUD showError:@"请选择商家详细地址！" toView:self.view.window];
         return NO;
     }
     if (self.tf_phoneNumber.text.length==0) {
@@ -351,9 +411,9 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserver:self selector:@selector(keyboardAppear:) name:UIKeyboardWillShowNotification object:nil];
-    [center addObserver:self selector:@selector(keyboardDisappear:) name:UIKeyboardWillHideNotification object:nil];
+//    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+//    [center addObserver:self selector:@selector(keyboardAppear:) name:UIKeyboardWillShowNotification object:nil];
+//    [center addObserver:self selector:@selector(keyboardDisappear:) name:UIKeyboardWillHideNotification object:nil];
 }
 - (void)keyboardAppear:(NSNotification *)notification
 {

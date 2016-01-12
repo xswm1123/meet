@@ -516,7 +516,7 @@ forHTTPHeaderField:(NSString *)field
             [mutableRequest setHTTPBody:[query dataUsingEncoding:self.stringEncoding]];
         }
     }
-
+    NSLog(@"mutableRequest:%@",mutableRequest.URL.absoluteString);
     return mutableRequest;
 }
 

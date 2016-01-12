@@ -7,8 +7,9 @@
 //
 
 #import "UploadVideoViewController.h"
+#import "PersonalHomePageViewController.h"
 
-@interface UploadVideoViewController ()<UITextViewDelegate>
+@interface UploadVideoViewController ()<UITextViewDelegate,UIActionSheetDelegate>
 {
     MBProgressHUD *HUD;
 }
@@ -18,6 +19,11 @@
 @property (nonatomic,strong) MPMoviePlayerController *moviePlayer;//视频播放控制器
 @property (nonatomic,strong) NSString *videoPath;//视频播放地址
 @property (weak, nonatomic) IBOutlet UIButton *joinButton;
+@property (nonatomic,strong) NSArray * categoryList;
+@property (nonatomic,strong) NSMutableArray * optionArr;
+@property (weak, nonatomic) IBOutlet UILabel *lb_type;
+@property (weak, nonatomic) IBOutlet UILabel *lb_icon;
+@property (weak, nonatomic) IBOutlet UIView *optionBG;
 @end
 // caches路径
 #define KCachesPath   \
@@ -27,10 +33,48 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    self.textField.placeholder=@"请输入视频的标题";
+    self.lb_icon.font=[UIFont fontWithName:iconFont size:18];
+    self.lb_icon.text=@"\U0000e637";
+    if (self.mark.length>0) {
+        self.textField.placeholder=@"您的描述...";
+    }else{
+        self.textField.placeholder=@"请输入视频的标题";
+        [self getVideoCategory];
+    }
     self.textField.delegate=self;
+   
+}
+-(void)getVideoCategory{
+    /**
+     *  加载类目
+     */
+    self.optionArr=[NSMutableArray array];
+    GetIndexCategoryRequest * request =[[GetIndexCategoryRequest alloc]init];
+    [SystemAPI GetIndexCategoryRequest:request success:^(GetIndexCategoryResponse *response) {
+        self.categoryList=[NSArray arrayWithArray:(NSArray*)response.data];
+        for (int i =0; i<self.categoryList.count; i++) {
+            NSDictionary * dic =self.categoryList[i];
+            [self.optionArr addObject:[dic objectForKey:@"name"]];
+        }
+        self.lb_type.text=[self.optionArr objectAtIndex:0];
+    } fail:^(BOOL notReachable, NSString *desciption) {
+        
+    }];
+}
+- (IBAction)chooseType:(id)sender {
+    UIActionSheet * ac =[[UIActionSheet alloc]initWithTitle:@"请选择类型" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:[self.optionArr objectAtIndex:0],[self.optionArr objectAtIndex:1],[self.optionArr objectAtIndex:2],[self.optionArr objectAtIndex:3], nil];
+    [ac showInView:self.view.window];
+}
+-(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
+    if (buttonIndex!=self.optionArr.count) {
+        self.lb_type.text=[self.optionArr objectAtIndex:buttonIndex];
+    }
 }
 - (IBAction)sendAction:(id)sender {
+    if (self.textField.text.length==0) {
+        [MBProgressHUD showError:@"请输入视频的标题！" toView:self.view];
+        return;
+    }
     NSLog(@"path:%@",self.videoPath);
     HUD = [MBProgressHUD showHUDAddedTo:self.view animated:YES];
     HUD.tag=1000;
@@ -39,25 +83,24 @@
     HUD.detailsLabelText=[NSString stringWithFormat:@"0%%"];
     [self getVideoRotate:^(BOOL flag) {
         if (flag) {
-            [self upload];
+            if (self.mark.length>0) {
+                [HUD hide:YES];
+                [self uploadPostImages];
+            }else{
+                 [self upload];
+            }
+           
         }
     }];
-}
-- (IBAction)joinAction:(id)sender {
-    if ([self.joinButton isSelected]) {
-        self.joinButton.selected=NO;
-    }else{
-        self.joinButton.selected=YES;
-    }
 }
 -(void)upload{
     //初始化进度条
     AFHTTPRequestOperationManager *manager = [[AFHTTPRequestOperationManager alloc]initWithBaseURL:[NSURL URLWithString:BASE_SERVERLURL]];
     UploadVideoRequest * request =[[UploadVideoRequest alloc]init];
     request.title=self.textField.text;
-    if ([self.joinButton isSelected]) {
-        request.categoryId=@"1";
-    }
+    NSInteger index =[self.optionArr indexOfObject:self.lb_type.text];
+    NSString * cateId=[NSString stringWithFormat:@"%ld",index+1];
+    request.categoryId=cateId;
     manager.responseSerializer=[AFJSONResponseSerializer serializer];
     NSData * fileData=[NSData dataWithContentsOfFile:self.videoPath];
     NSDate *now = [NSDate new];
@@ -70,6 +113,7 @@
         [formData appendPartWithFileData :fileData name:name fileName:fileName mimeType:@"video/mpeg"];
     } success:^(AFHTTPRequestOperation *operation, id responseObject) {
          NSLog(@"message:%@",[responseObject objectForKey:@"message"]);
+        NSLog(@"data:%@",[responseObject objectForKey:@"data"]);
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
          NSLog(@"message:%@",error.description);
     }];
@@ -88,7 +132,9 @@
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
         [MBProgressHUD showSuccess:[responseObject objectForKey:@"message"] toView:ShareAppDelegate.window];
         NSLog(@"message:%@",[responseObject objectForKey:@"message"]);
-        [self.navigationController popViewControllerAnimated:YES];
+        NSLog(@"data:%@",[responseObject objectForKey:@"data"]);
+//        [self.navigationController popViewControllerAnimated:YES];
+        [self moveToHomePage];
     } failure:^(AFHTTPRequestOperation *operation, NSError *error) {
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
         [MBProgressHUD showError:error.description toView:self.view];
@@ -109,10 +155,6 @@
     [self.videoBG addSubview:_moviePlayer.view];
     [_moviePlayer prepareToPlay];
     [_moviePlayer play];
-//    NSDate *now = [NSDate new];
-//    NSDateFormatter *formatter = [NSDateFormatter new];
-//    [formatter setDateFormat:@"yyMMddHHmmss"];
-//    NSString *name = [NSString stringWithFormat:@"VIDEO_%@",[formatter stringFromDate:now]];
     NSString * fileName=[NSString stringWithFormat:@"%@.mp4",@"test"];
     [self videoWithUrl:self.url withFileName:fileName];
 }
@@ -263,24 +305,6 @@
     
     [assetExport exportAsynchronouslyWithCompletionHandler:
      ^(void ) {
-//         switch (assetExport.status)
-//         {
-//             case AVAssetExportSessionStatusCompleted:
-//                 //                export complete
-//                 NSLog(@"Export Complete");
-//                 [self upload];
-//                 break;
-//             case AVAssetExportSessionStatusFailed:
-//                 NSLog(@"Export Failed");
-//                 NSLog(@"ExportSessionError: %@", [assetExport.error localizedDescription]);
-//                 //                export error (see exportSession.error)
-//                 break;
-//             case AVAssetExportSessionStatusCancelled:
-//                 NSLog(@"Export Failed");
-//                 NSLog(@"ExportSessionError: %@", [assetExport.error localizedDescription]);
-//                 //                export cancelled
-//                 break;
-//         }
          if (assetExport.status==AVAssetExportSessionStatusCompleted) {
              block(YES);
          }else{
@@ -295,5 +319,48 @@
         return NO;
     }
     return YES;
+}
+/**
+ *  上传朋友圈视频
+ */
+-(void)uploadPostImages{
+    [MBProgressHUD showHUDAddedTo:self.view.window animated:YES];
+    NSData * fileData=[NSData dataWithContentsOfFile:self.videoPath];
+    NSDate *now = [NSDate new];
+    NSDateFormatter *formatter = [NSDateFormatter new];
+    [formatter setDateFormat:@"yyMMddHHmmss"];
+    NSString *name = [NSString stringWithFormat:@"VIDEO_%@",[formatter stringFromDate:now]];
+    NSString * fileName=[NSString stringWithFormat:@"%@.mp4",name];
+    [X_BaseAPI uploadFile:fileData name:name fileName:fileName mimeType:@"video/mpeg" Success:^(X_BaseHttpResponse * response) {
+        NSArray * arr=(NSArray*)response.data;
+        NSString* url=[arr firstObject];
+        [self postMessageWithVideoUrl:url];
+    } fail:^(BOOL NotReachable, NSString *descript) {
+        
+    } class:[UploadFilesResponse class]];
+    
+    
+}
+-(void)postMessageWithVideoUrl:(NSString*)url{
+    PostFriendCircleRequest * request=[[PostFriendCircleRequest alloc]init];
+    request.content=self.textField.text;
+    request.videoUrl=url;
+    [SystemAPI PostFriendCircleRequest:request success:^(PostFriendCircleResponse *response) {
+        [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+        [MBProgressHUD showSuccess:response.message toView:self.view.window];
+        [self.navigationController popViewControllerAnimated:YES];
+    } fail:^(BOOL notReachable, NSString *desciption) {
+        [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+        [MBProgressHUD showError:desciption toView:self.view.window];
+    }];
+}
+/**
+ *  视频上传成功  跳转到个人中心的列表页面
+ */
+-(void)moveToHomePage{
+    UIStoryboard * sb =[UIStoryboard storyboardWithName:@"Main" bundle:nil] ;
+    PersonalHomePageViewController * vc =[sb instantiateViewControllerWithIdentifier:@"homePage"];
+    vc.mark=@"video";
+    [self.navigationController pushViewController:vc animated:YES];
 }
 @end

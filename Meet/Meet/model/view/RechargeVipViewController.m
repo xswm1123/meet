@@ -7,8 +7,9 @@
 //
 
 #import "RechargeVipViewController.h"
+#import <StoreKit/StoreKit.h>
 
-@interface RechargeVipViewController ()<UIActionSheetDelegate>
+@interface RechargeVipViewController ()<UIActionSheetDelegate,SKPaymentTransactionObserver,SKProductsRequestDelegate>
 @property (weak, nonatomic) IBOutlet UIButton *aliPayBtn;
 @property (weak, nonatomic) IBOutlet UIButton *wePayBtn;
 @property (weak, nonatomic) IBOutlet UILabel *lb_info;
@@ -23,16 +24,24 @@
 @property (nonatomic,assign) double money;
 @property (nonatomic,strong) NSArray * types;
 @property (nonatomic,assign) NSInteger golds;
+@property (nonatomic,assign) BOOL canUpdate;
 @end
 
 @implementation RechargeVipViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.canUpdate=NO;
+    if (![WXApi isWXAppInstalled]) {
+        self.aliPayBtn.hidden=YES;
+        self.wePayBtn.hidden=YES;
+    }
+    //添加内支付监听
+    [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     [self initView];
 }
 -(void)initView{
-    self.types=@[@"1个月VIP",@"3个月VIP",@"一年VIP",@"商家一个月VIP",@"商家一年VIP"];
+    self.types=@[@"3个月VIP",@"1个月VIP",@"一年VIP",@"黄金永久VIP",@"钻石永久VIP"];
     self.lb_type.text=[self.types objectAtIndex:0];
     self.lb_icon.font=[UIFont fontWithName:iconFont size:18];
     self.lb_icon.text=@"\U0000e637";
@@ -60,10 +69,10 @@
     [self.wePayBtn setAttributedTitle:we forState:UIControlStateNormal];
     //data
     self.lb_ID.text=[NSString stringWithFormat:@"%@",[ShareValue shareInstance].userInfo.meetid];
-    self.money=28.88;
-    self.golds=2888;
+    self.money=298;
+    self.golds=30000;
     NSString * moneys=[NSString stringWithFormat:@"%.2f",self.money];
-    NSString * gold=[NSString stringWithFormat:@"%d",self.golds];
+    NSString * gold=[NSString stringWithFormat:@"%ld",(long)self.golds];
     NSMutableAttributedString * mn=[[NSMutableAttributedString alloc]initWithString:[NSString stringWithFormat:@"%@元,赠送%@金币",moneys,gold]];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:22],NSForegroundColorAttributeName:iconYellow} range:NSMakeRange(0, moneys.length)];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:17],NSForegroundColorAttributeName:[UIColor whiteColor]} range:NSMakeRange(moneys.length,mn.length-moneys.length)];
@@ -71,31 +80,46 @@
 }
 -(void)setMoneyText:(double)money WithGold:(NSInteger)golds{
     NSString * moneys=[NSString stringWithFormat:@"%.2f",money];
-    NSString * gold=[NSString stringWithFormat:@"%d",golds];
+    NSString * gold=[NSString stringWithFormat:@"%ld",(long)golds];
     NSMutableAttributedString * mn=[[NSMutableAttributedString alloc]initWithString:[NSString stringWithFormat:@"%@元,赠送%@金币",moneys,gold]];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:22],NSForegroundColorAttributeName:iconYellow} range:NSMakeRange(0, moneys.length)];
     [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:17],NSForegroundColorAttributeName:[UIColor whiteColor]} range:NSMakeRange(moneys.length,mn.length-moneys.length)];
     self.lb_money.attributedText=mn;
 }
 - (IBAction)chooseTypes:(id)sender {
-    UIActionSheet * al=[[UIActionSheet alloc]initWithTitle:@"请选择充值套餐" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"1个月VIP",@"3个月VIP",@"一年VIP",@"商家一个月VIP",@"商家一年VIP", nil];
+    if (![WXApi isWXAppInstalled]) {
+        UIActionSheet * al=[[UIActionSheet alloc]initWithTitle:@"请选择充值套餐" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"3个月VIP",nil];
+        [al showInView:self.view.window];
+        return;
+    }
+    UIActionSheet * al=[[UIActionSheet alloc]initWithTitle:@"请选择充值套餐" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"3个月VIP",@"1个月VIP",@"一年VIP",@"黄金永久VIP",@"钻石永久VIP", nil];
     [al showInView:self.view.window];
 }
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
+   
     if (buttonIndex==0) {
         self.lb_type.text=[self.types objectAtIndex:0];
-        self.money=28.88;
-        [self setMoneyText:28.88 WithGold:2888];
+        self.money=298;
+        [self setMoneyText:298 WithGold:30000];
     }
     if (buttonIndex==1) {
+        if (![WXApi isWXAppInstalled]) {
+            return;
+        }
         self.lb_type.text=[self.types objectAtIndex:1];
-        self.money=58.88;
-        [self setMoneyText:58.88 WithGold:5888];
+        self.money=198;
+        [self setMoneyText:198 WithGold:1000];
     }
     if (buttonIndex==2) {
-        self.lb_type.text=[self.types objectAtIndex:2];
-        self.money=198.88;
-        [self setMoneyText:198.88 WithGold:19888];
+        if (![WXApi isWXAppInstalled]) {
+//            self.lb_type.text=[self.types objectAtIndex:1];
+//            self.money=498;
+//            [self setMoneyText:498 WithGold:50000];
+        }else{
+            self.lb_type.text=[self.types objectAtIndex:2];
+            self.money=498;
+            [self setMoneyText:498 WithGold:50000];
+        }
     }
     if (buttonIndex==3) {
         self.lb_type.text=[self.types objectAtIndex:3];
@@ -120,8 +144,8 @@
     }
 }
 - (IBAction)addAction:(id)sender {
-    NSInteger count =[self.lb_count.text integerValue];
-    self.lb_count.text=[NSString stringWithFormat:@"%d",count+1];
+//    NSInteger count =[self.lb_count.text integerValue];
+//    self.lb_count.text=[NSString stringWithFormat:@"%d",count+1];
     self.money=[self.lb_count.text integerValue]*10;
 //    [self setMoneyText:self.money];
 }
@@ -139,29 +163,36 @@
     [self.aliPayBtn setBackgroundColor:[UIColor clearColor]];
 }
 - (IBAction)buyAction:(id)sender {
+    self.canUpdate=YES;
+    if (![WXApi isWXAppInstalled]) {
+        [self payWithInPurse];
+        return;
+    }else{
+        self.canUpdate=NO;
+    }
     //微信支付
     if ([self.aliPayBtn isSelected]) {
         [MBProgressHUD showHUDAddedTo:self.view animated:YES];
         CreatePayOrderRequest * request=[[CreatePayOrderRequest alloc]init];
         request.payType=2;
         request.tradeType=2;
-        if ([self.lb_type.text isEqualToString:@"1个月VIP"]) {
-            request.month=1;
-            request.gold=2888;
-        }
         if ([self.lb_type.text isEqualToString:@"3个月VIP"]) {
              request.month=3;
-            request.gold=5888;
+            request.gold=30000;
+        }
+        if ([self.lb_type.text isEqualToString:@"1个月VIP"]) {
+            request.month=1;
+            request.gold=1000;
         }
         if ([self.lb_type.text isEqualToString:@"一年VIP"]) {
             request.month=12;
-            request.gold=19888;
+            request.gold=50000;
         }
-        if ([self.lb_type.text isEqualToString:@"商家一个月VIP"]) {
+        if ([self.lb_type.text isEqualToString:@"黄金永久VIP"]) {
             request.month=1;
             request.gold=68888;
         }
-        if ([self.lb_type.text isEqualToString:@"商家一年VIP"]) {
+        if ([self.lb_type.text isEqualToString:@"钻石永久VIP"]) {
             request.month=12;
             request.gold=1428888;
         }
@@ -176,7 +207,6 @@
             [MBProgressHUD showError:desciption toView:self.view];
         }];
     }
-    
     //支付宝支付
     if ([self.wePayBtn isSelected]) {
         [MBProgressHUD showHUDAddedTo:self.view animated:YES];
@@ -185,17 +215,21 @@
         request.tradeType=2;
         if ([self.lb_type.text isEqualToString:@"3个月VIP"]) {
             request.month=3;
-            request.gold=11111;
+            request.gold=30000;
+        }
+        if ([self.lb_type.text isEqualToString:@"1个月VIP"]) {
+            request.month=1;
+            request.gold=1000;
         }
         if ([self.lb_type.text isEqualToString:@"一年VIP"]) {
             request.month=12;
-            request.gold=48888;
+            request.gold=50000;
         }
-        if ([self.lb_type.text isEqualToString:@"商家一个月VIP"]) {
+        if ([self.lb_type.text isEqualToString:@"黄金永久VIP"]) {
             request.month=1;
             request.gold=68888;
         }
-        if ([self.lb_type.text isEqualToString:@"商家一年VIP"]) {
+        if ([self.lb_type.text isEqualToString:@"钻石永久VIP"]) {
             request.month=12;
             request.gold=1428888;
         }
@@ -222,7 +256,7 @@
     myOrder.tradeNO = ID; //订单ID（由商家自行制定）
     myOrder.productName = @"相遇会员充值"; //商品标题
     myOrder.productDescription =@"会员"; //商品描述
-    myOrder.amount = [NSString stringWithFormat:@"%d",self.money]; //商品价格
+    myOrder.amount = [NSString stringWithFormat:@"%.2f",self.money]; //商品价格
     myOrder.notifyURL =  @"http://xy.immet.cm/xy/rest/pay/alipay_notify"; //回调URL
     myOrder.service = @"mobile.securitypay.pay";
     myOrder.paymentType = @"1";
@@ -231,7 +265,7 @@
     myOrder.showUrl = @"m.alipay.com";
     
     //应用注册scheme,在AlixPayDemo-Info.plist定义URL types
-    NSString *appScheme = @"alisdkdemo";
+    NSString *appScheme = @"alimeet";
     
     //将商品信息拼接成字符串
     NSString *orderSpec = [myOrder description];
@@ -243,14 +277,20 @@
     
     //将签名成功字符串格式化为订单字符串,请严格按照该格式
     NSString *orderString = nil;
-    if (signedString != nil) {
-        orderString = [NSString stringWithFormat:@"%@&sign=\"%@\"&sign_type=\"%@\"",
-                       orderSpec, signedString, @"RSA"];
-        [[AlipaySDK defaultService] payOrder:orderString fromScheme:appScheme callback:^(NSDictionary *resultDic) {
-            NSLog(@"reslut = %@",resultDic);
-            NSString * code=[NSString stringWithFormat:@"%@",[resultDic objectForKey:@"resultStatus"]];
-            NSLog(@"code:%@",code);
-        }];
+     BOOL flag =[[UIApplication sharedApplication] canOpenURL:[NSURL URLWithString:@"alimeet:"]];
+    if (flag) {
+        NSLog(@"can open the url nice!");
+        if (signedString != nil) {
+            orderString = [NSString stringWithFormat:@"%@&sign=\"%@\"&sign_type=\"%@\"",
+                           orderSpec, signedString, @"RSA"];
+            [[AlipaySDK defaultService] payOrder:orderString fromScheme:appScheme callback:^(NSDictionary *resultDic) {
+                NSLog(@"reslut = %@",resultDic);
+                NSString * code=[NSString stringWithFormat:@"%@",[resultDic objectForKey:@"resultStatus"]];
+                NSLog(@"code:%@",code);
+            }];
+        }
+    }else{
+        NSLog(@"can not open the url nice!");
     }
 }
 //微信预支付
@@ -270,12 +310,131 @@
         req.timeStamp           = stamp.intValue;
         req.package             = [response.data objectForKey:@"package"];
         req.sign                = [response.data objectForKey:@"sign"];
-        [WXApi sendReq:req];
+//        if (![WXApi isWXAppInstalled]) {
+             [WXApi sendReq:req];
+//            NSLog(@"isWXAppInstalled");
+//        }else{
+//            NSLog(@"isWXAppInstalled NOT");
+//            [self payWithInPurse];
+//        }
+       
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
     } fail:^(BOOL notReachable, NSString *desciption) {
         [MBProgressHUD hideAllHUDsForView:self.view animated:YES];
         [MBProgressHUD showError:desciption toView:self.view];
     }];
 }
+-(void)payWithInPurse{
+    NSString *product=@"com.immet.meets_VIPM";
+    if([SKPaymentQueue canMakePayments]){
+        [self requestProductData:product];
+    }else{
+        NSLog(@"不允许程序内付费");
+    }
+}
+//请求商品
+- (void)requestProductData:(NSString *)type{
+    NSLog(@"-------------请求对应的产品信息----------------");
+//    NSArray *product = [[NSArray alloc] initWithObjects:type];
+    
+    NSSet *nsset = [NSSet setWithArray:@[type]];
+    SKProductsRequest *request = [[SKProductsRequest alloc] initWithProductIdentifiers:nsset];
+    request.delegate = self;
+    [request start];
+    
+}
 
+//收到产品返回信息
+- (void)productsRequest:(SKProductsRequest *)request didReceiveResponse:(SKProductsResponse *)response{
+    
+    NSLog(@"--------------收到产品反馈消息---------------------");
+    NSArray *product = response.products;
+    if([product count] == 0){
+        NSLog(@"--------------没有商品------------------");
+        return;
+    }
+    
+    NSLog(@"productID:%@", response.invalidProductIdentifiers);
+    NSLog(@"产品付费数量:%d",[product count]);
+    
+    SKProduct *p = nil;
+    for (SKProduct *pro in product) {
+        NSLog(@"%@", [pro description]);
+        NSLog(@"%@", [pro localizedTitle]);
+        NSLog(@"%@", [pro localizedDescription]);
+        NSLog(@"%@", [pro price]);
+        NSLog(@"%@", [pro productIdentifier]);
+        
+        if([pro.productIdentifier isEqualToString:@"com.immet.meets_VIPM"]){
+            p = pro;
+        }
+    }
+    
+    SKPayment *payment = [SKPayment paymentWithProduct:p];
+    
+    NSLog(@"发送购买请求");
+    [[SKPaymentQueue defaultQueue] addPayment:payment];
+}
+
+//请求失败
+- (void)request:(SKRequest *)request didFailWithError:(NSError *)error{
+    NSLog(@"------------------错误-----------------:%@", error);
+}
+
+- (void)requestDidFinish:(SKRequest *)request{
+    NSLog(@"------------反馈信息结束-----------------");
+}
+
+
+//监听购买结果
+- (void)paymentQueue:(SKPaymentQueue *)queue updatedTransactions:(NSArray *)transaction{
+    for(SKPaymentTransaction *tran in transaction){
+        
+        switch (tran.transactionState) {
+            case SKPaymentTransactionStatePurchased:
+                NSLog(@"交易完成");
+                if (self.canUpdate) {
+                    [self updateVIPInfo];
+                }
+                break;
+            case SKPaymentTransactionStatePurchasing:
+                NSLog(@"商品添加进列表");
+                
+                break;
+            case SKPaymentTransactionStateRestored:
+                NSLog(@"已经购买过商品");
+                
+                break;
+            case SKPaymentTransactionStateFailed:
+                NSLog(@"交易失败：%@",tran.error);
+                
+                break;
+            default:
+                break;
+        }
+    }
+}
+
+//交易结束
+- (void)completeTransaction:(SKPaymentTransaction *)transaction{
+    NSLog(@"交易结束");
+    
+    [[SKPaymentQueue defaultQueue] finishTransaction:transaction];
+}
+
+
+- (void)dealloc{
+    [[SKPaymentQueue defaultQueue] removeTransactionObserver:self];
+}
+//内购接口
+-(void)updateVIPInfo{
+    IAPPurchaseRequest * request =[[IAPPurchaseRequest alloc]init];
+    request.month=@"3";
+    request.gold=@"30000";
+    [SystemAPI IAPPurchaseRequest:request success:^(IAPPurchaseResponse *response) {
+        [self updatePersonalInfo];
+    } fail:^(BOOL notReachable, NSString *desciption) {
+        
+    }];
+}
 @end

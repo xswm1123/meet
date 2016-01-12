@@ -9,6 +9,8 @@
 #import <Foundation/Foundation.h>
 
 @interface X_BaseHttpRequest : NSObject
+@property (nonatomic,strong) NSString * token;
+@property (nonatomic,strong) NSString * version;
 -(void)setRequestPath:(NSString *)path;
 
 -(NSString *)requestPath;

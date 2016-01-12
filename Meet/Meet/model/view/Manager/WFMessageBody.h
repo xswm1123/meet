@@ -64,4 +64,9 @@
  *  CircleId
  */
 @property (nonatomic,strong) NSString * circleId;
+/**
+ *  videoUrl
+ */
+@property (nonatomic,strong) NSString * videoUrl;
+
 @end

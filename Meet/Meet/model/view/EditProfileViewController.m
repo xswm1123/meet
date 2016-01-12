@@ -299,7 +299,18 @@
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"请选择您的生日\n\n\n\n\n\n\n\n\n\n\n\n" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
         UIAlertAction *cancleAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
             [frm setDateFormat:@"YYYY-MM-dd"];
-            lb.text=[frm stringFromDate:dp.date];
+            NSString * birthday=[frm stringFromDate:dp.date];
+            NSArray * years=[birthday componentsSeparatedByString:@"-"];
+            NSString * year =[years firstObject];
+            NSDate * nowDate=[NSDate new];
+            NSString * nowYear =[frm stringFromDate:nowDate];
+            NSString * nowYears =[[nowYear componentsSeparatedByString:@"-"] firstObject];
+            
+            if (nowYears.integerValue- year.integerValue>18) {
+                lb.text=[frm stringFromDate:dp.date];
+            }else{
+            [MBProgressHUD showError:@"年龄不能小于18哦~" toView:self.view];
+            }
         }];
         [alertController.view addSubview:dp];
         [alertController addAction:cancleAction];
@@ -310,14 +321,25 @@
         [sheet addSubview:dp];
         [sheet showFromToolbar:self.navigationController.toolbar];
     }
-    
 }
 -(void)datePickerValueChanged:(UIDatePicker*)sender WithGesture:(UITapGestureRecognizer*)gesture
 {
     NSDateFormatter * frm=[[NSDateFormatter alloc]init];
     [frm setDateFormat:@"YYYY-MM-dd"];
     UILabel * lb =[self.tfsArr objectAtIndex:1];
-    lb.text=[frm stringFromDate:sender.date];
+    NSString * birthday=[frm stringFromDate:sender.date];
+    NSArray * years=[birthday componentsSeparatedByString:@"-"];
+    NSString * year =[years firstObject];
+    NSDate * nowDate=[NSDate new];
+    NSString * nowYear =[frm stringFromDate:nowDate];
+    NSString * nowYears =[[nowYear componentsSeparatedByString:@"-"] firstObject];
+    
+    if (nowYears.integerValue- year.integerValue>18) {
+        lb.text=[frm stringFromDate:sender.date];
+    }else{
+        [MBProgressHUD showError:@"年龄不能小于18哦~" toView:self.view];
+    }
+
 }
 //选择情感状态
 -(void)chooseEmotionTypes{

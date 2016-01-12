@@ -217,7 +217,8 @@ static MapUtils * _Maputils;
         [ShareValue shareInstance].province=province;
         [ShareValue shareInstance].city=city;
         [ShareValue shareInstance].detailAddress =detalAddress;
-        [ShareValue shareInstance].address=result.addressDetail.streetName;
+        [ShareValue shareInstance].address=[NSString stringWithFormat:@"%@ %@ %@ %@",city,district,street,number.length>0?number:@""];
+
         NSLog(@"address:%@,%@,%@,%@,%@",result.addressDetail.province,result.addressDetail.city,result.addressDetail.district,result.addressDetail.streetName,result.addressDetail.streetNumber);
         [[NSNotificationCenter defaultCenter]postNotificationName:NOTIFICATION_LOCATION_UPDATED object:[ShareValue shareInstance].address];
           }

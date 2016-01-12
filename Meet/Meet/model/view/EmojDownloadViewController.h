@@ -7,6 +7,7 @@
 //
 
 #import "BaseViewController.h"
+#import "ZipArchive.h"
 
 @interface EmojDownloadViewController : BaseViewController
 

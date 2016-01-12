@@ -22,6 +22,20 @@
 #define SET_PASSWORD @"SET_PASSWORD"
 #define SET_PROVINCE @"SET_PROVINCE"
 #define SET_LASTVISIT @"SET_LASTVISIT"
+#define SET_LASTDATE @"SET_LASTDATE"
+#define SET_CIRCLEMESSAGE @"SET_CIRCLEMESSAGE"
+#define SET_SYSTEMMESSAGE @"SET_SYSTEMMESSAGE"
+#define SET_LASTVISITMESSAGE @"SET_LASTVISITMESSAGE"
+#define SET_GOLDNOTIS @"SET_GOLDNOTIS"
+#define SET_IS10MINS @"SET_IS10MINS"
+#define SET_IS30MINS @"SET_IS30MINS"
+#define SET_IS60MINS @"SET_IS60MINS"
+#define SET_IS120MINS @"SET_IS120MINS"
+#define SET_POSTMESSAGE @"SET_POSTMESSAGE"
+#define SET_ISDOWNLOADQQ @"SET_ISDOWNLOADQQ"
+#define SET_ISDOWNLOADMOMO @"SET_ISDOWNLOADMOMO"
+#define SET_SESSION @"SET_SESSION"
+#define SET_TIMEDIFF @"SET_TIMEDIFF"
 
 static ShareValue * _shareValue;
 @implementation ShareValue
@@ -234,6 +248,230 @@ static ShareValue * _shareValue;
         [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_LASTVISIT];
     }else{
         [[NSUserDefaults standardUserDefaults]setObject:lastVisitCount forKey:SET_LASTVISIT];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(void)setLastVisitDate:(NSString *)lastVisitDate{
+    if (!lastVisitDate) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_LASTDATE];
+    }else{
+        [[NSUserDefaults standardUserDefaults]setObject:lastVisitDate forKey:SET_LASTDATE];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSString *)lastVisitDate{
+    return  [[NSUserDefaults standardUserDefaults]objectForKey:SET_LASTDATE];
+}
+/**
+ *  未读消息处理
+ */
+-(void)setCircleMessage:(NSNumber *)circleMessage{
+    if (!circleMessage) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_CIRCLEMESSAGE];
+    }else{
+        [[NSUserDefaults standardUserDefaults]setObject:circleMessage forKey:SET_CIRCLEMESSAGE];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSNumber *)circleMessage{
+     return  [[NSUserDefaults standardUserDefaults]objectForKey:SET_CIRCLEMESSAGE];
+}
+-(void)setSystemMessage:(NSNumber *)systemMessage{
+    if (!systemMessage) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_SYSTEMMESSAGE];
+    }else{
+        [[NSUserDefaults standardUserDefaults]setObject:systemMessage forKey:SET_SYSTEMMESSAGE];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSNumber *)systemMessage{
+    return  [[NSUserDefaults standardUserDefaults]objectForKey:SET_SYSTEMMESSAGE];
+}
+-(void)setLastVisitMessage:(NSNumber *)lastVisitMessage{
+    if (!lastVisitMessage) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_LASTVISITMESSAGE];
+    }else{
+        [[NSUserDefaults standardUserDefaults]setObject:lastVisitMessage forKey:SET_LASTVISITMESSAGE];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSNumber *)lastVisitMessage{
+    return  [[NSUserDefaults standardUserDefaults]objectForKey:SET_LASTVISITMESSAGE];
+}
+-(NSMutableArray *)goldNotis{
+    return  [[NSUserDefaults standardUserDefaults]objectForKey:SET_GOLDNOTIS];
+}
+-(void)setGoldNotis:(NSMutableArray *)goldNotis{
+    if (!goldNotis) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_GOLDNOTIS];
+    }else{
+        NSMutableArray * archiveArray=[NSMutableArray arrayWithCapacity:goldNotis.count];
+        for (UILocalNotification *personObject in goldNotis) {
+            NSData *personEncodedObject = [NSKeyedArchiver archivedDataWithRootObject:personObject];
+            [archiveArray addObject:personEncodedObject];
+        }
+        [[NSUserDefaults standardUserDefaults]setObject:archiveArray forKey:SET_GOLDNOTIS];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(void)setIs10Mins:(BOOL)is10Mins{
+    NSString * isUsed;
+    if (!is10Mins) {
+        isUsed=@"0";
+    }
+    if (is10Mins) {
+        isUsed=@"1";
+    }
+    [[NSUserDefaults standardUserDefaults]setObject:isUsed forKey:SET_IS10MINS];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(BOOL)is10Mins{
+    NSString * isUsed =[[NSUserDefaults standardUserDefaults]objectForKey:SET_IS10MINS];
+    if ([isUsed isEqualToString:@"0"]) {
+        return NO;
+    }
+    if ([isUsed isEqualToString:@"1"]) {
+        return YES;
+    }
+    return NO;
+}
+-(void)setIs30Mins:(BOOL)is30Mins{
+    NSString * isUsed;
+    if (!is30Mins) {
+        isUsed=@"0";
+    }
+    if (is30Mins) {
+        isUsed=@"1";
+    }
+    [[NSUserDefaults standardUserDefaults]setObject:isUsed forKey:SET_IS30MINS];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(BOOL)is30Mins{
+    NSString * isUsed =[[NSUserDefaults standardUserDefaults]objectForKey:SET_IS30MINS];
+    if ([isUsed isEqualToString:@"0"]) {
+        return NO;
+    }
+    if ([isUsed isEqualToString:@"1"]) {
+        return YES;
+    }
+    return NO;
+}
+-(void)setIs60Mins:(BOOL)is60Mins{
+    NSString * isUsed;
+    if (!is60Mins) {
+        isUsed=@"0";
+    }
+    if (is60Mins) {
+        isUsed=@"1";
+    }
+    [[NSUserDefaults standardUserDefaults]setObject:isUsed forKey:SET_IS60MINS];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(BOOL)is60Mins{
+    NSString * isUsed =[[NSUserDefaults standardUserDefaults]objectForKey:SET_IS60MINS];
+    if ([isUsed isEqualToString:@"0"]) {
+        return NO;
+    }
+    if ([isUsed isEqualToString:@"1"]) {
+        return YES;
+    }
+    return NO;
+}
+
+-(void)setIs120Mins:(BOOL)is120Mins{
+    NSString * isUsed;
+    if (!is120Mins) {
+        isUsed=@"0";
+    }
+    if (is120Mins) {
+        isUsed=@"1";
+    }
+    [[NSUserDefaults standardUserDefaults]setObject:isUsed forKey:SET_IS120MINS];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(BOOL)is120Mins{
+    NSString * isUsed =[[NSUserDefaults standardUserDefaults]objectForKey:SET_IS120MINS];
+    if ([isUsed isEqualToString:@"0"]) {
+        return NO;
+    }
+    if ([isUsed isEqualToString:@"1"]) {
+        return YES;
+    }
+    return NO;
+}
+-(void)setPostMessage:(NSDictionary *)postMessage{
+    if (!postMessage) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_POSTMESSAGE];
+    }else{
+        [[NSUserDefaults standardUserDefaults]setObject:postMessage forKey:SET_POSTMESSAGE];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSDictionary *)postMessage{
+    return  [[NSUserDefaults standardUserDefaults]objectForKey:SET_POSTMESSAGE];
+}
+-(void)setIsDownloadQQ:(BOOL)isDownloadQQ{
+    NSString * isDown;
+    if (!isDownloadQQ) {
+        isDown=@"0";
+    }
+    if (isDownloadQQ) {
+        isDown=@"1";
+    }
+    [[NSUserDefaults standardUserDefaults]setObject:isDown forKey:SET_ISDOWNLOADQQ];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(BOOL)isDownloadQQ{
+    NSString * isDown =[[NSUserDefaults standardUserDefaults]objectForKey:SET_ISDOWNLOADQQ];
+    if ([isDown isEqualToString:@"0"]) {
+        return NO;
+    }
+    if ([isDown isEqualToString:@"1"]) {
+        return YES;
+    }
+    return NO;
+}
+-(void)setIsDownloadMOMO:(BOOL)isDownloadMOMO
+{
+    NSString * isDown;
+    if (!isDownloadMOMO) {
+        isDown=@"0";
+    }
+    if (isDownloadMOMO) {
+        isDown=@"1";
+    }
+    [[NSUserDefaults standardUserDefaults]setObject:isDown forKey:SET_ISDOWNLOADMOMO];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(BOOL)isDownloadMOMO{
+    NSString * isDown =[[NSUserDefaults standardUserDefaults]objectForKey:SET_ISDOWNLOADMOMO];
+    if ([isDown isEqualToString:@"0"]) {
+        return NO;
+    }
+    if ([isDown isEqualToString:@"1"]) {
+        return YES;
+    }
+    return NO;
+}
+-(void)setSession:(NSString *)session{
+    if (!session) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_SESSION];
+    }else{
+        [[NSUserDefaults standardUserDefaults]setObject:session forKey:SET_SESSION];
+    }
+    [[NSUserDefaults standardUserDefaults] synchronize];
+}
+-(NSString *)session{
+    return [[NSUserDefaults standardUserDefaults]objectForKey:SET_SESSION];
+}
+-(NSNumber *)timeDiff{
+    return [[NSUserDefaults standardUserDefaults]objectForKey:SET_TIMEDIFF];
+}
+-(void)setTimeDiff:(NSNumber *)timeDiff{
+    if (!timeDiff) {
+        [[NSUserDefaults standardUserDefaults]removeObjectForKey:SET_TIMEDIFF];
+    }else{
+        [[NSUserDefaults standardUserDefaults]setObject:timeDiff forKey:SET_TIMEDIFF];
     }
     [[NSUserDefaults standardUserDefaults] synchronize];
 }

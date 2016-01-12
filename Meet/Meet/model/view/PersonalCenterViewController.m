@@ -114,7 +114,7 @@
     NSDateFormatter *formatter = [NSDateFormatter new];
     [formatter setDateFormat:@"yyMMddHHmmss"];
     NSString *fileName = [NSString stringWithFormat:@"%@IMG_%@",self.title,[formatter stringFromDate:now]];
-    self.photoImage=[ImageInfo makeThumbnailFromImage:self.photoImage scale:0.5];
+//    self.photoImage=[ImageInfo makeThumbnailFromImage:self.photoImage scale:0.5];
     ImageInfo * details=[[ImageInfo alloc]initWithImage:self.photoImage];
     [X_BaseAPI uploadFile:details.fileData name:fileName fileName:details.fileName mimeType:details.mimeType Success:^(X_BaseHttpResponse * response) {
         NSArray * arr=(NSArray*)response.data;
@@ -211,7 +211,11 @@
                 cell.lb_title.text=@"商家管理";
                 cell.lb_icon.textColor=[UIColor colorWithRed:243/255.0 green:197/255.0 blue:45/255.0 alpha:1.0];
                 break;
-                
+//            case 3:
+//                cell.lb_icon.text=@"\U0000e60a";
+//                cell.lb_title.text=@"提现";
+//                cell.lb_icon.textColor=[UIColor colorWithRed:243/255.0 green:197/255.0 blue:45/255.0 alpha:1.0];
+//                break;
             default:
                 break;
         }
@@ -237,6 +241,9 @@
     return cell;
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section{
+    if (section==3) {
+        return 0.1;
+    }
     return 15;
 }
 -(UIView *)tableView:(UITableView *)tableView viewForFooterInSection:(NSInteger)section{
@@ -266,6 +273,7 @@
         case 2:
             switch (indexPath.row) {
                 case 0:
+                    [[UIApplication sharedApplication] openURL:[NSURL URLWithString:[NSString stringWithFormat: @"itms-apps://itunes.apple.com/WebObjects/MZStore.woa/wa/viewContentsUserReviews?type=Purple+Software&id=1041964050" ]]];
                     break;
                     case 1:
                     /**
@@ -276,6 +284,9 @@
                 case 2:
                     [self handleLogicWithInfo];
                     break;
+//                case 3:
+//                    [MBProgressHUD showError:@"开发中,敬请期待..." toView:self.view.window];
+//                    break;
                 default:
                     break;
             }
@@ -311,7 +322,6 @@
     }else{
         [self showStoreWarning];
     }
-
 }
 -(void)chatWithServiceOrNot{
     UIAlertView * al=[[UIAlertView alloc]initWithTitle:@"温馨提示" message:@"您还不是商家，您可以联系客户--相遇小秘书，获取相关的信息！" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"确定", nil];

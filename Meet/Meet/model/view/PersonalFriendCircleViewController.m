@@ -181,11 +181,17 @@
             message.memberId=[NSString stringWithFormat:@"%@",[resultDic objectForKey:@"memberId"]];
             message.circleId=[resultDic objectForKey:@"circleId"];
             message.time=[dic objectForKey:@"time"];
+            if ([[resultDic objectForKey:@"videoUrl"] isKindOfClass:[NSNull class]]) {
+                message.videoUrl=@"";
+            }else{
+                message.videoUrl=[resultDic objectForKey:@"videoUrl"];
+            }
             //回复部分
             NSArray * replies=[resultDic objectForKey:@"commentList"];
             NSMutableArray * bodys=[NSMutableArray array];
             for (NSDictionary * reply in replies) {
                 WFReplyBody *body1 = [[WFReplyBody alloc] init];
+                body1.commentId=[reply objectForKey:@"commentId"];
                 body1.replyUser = [reply objectForKey:@"nickname"];
                 body1.repliedUser = [NSString stringWithFormat:@"%@",[reply objectForKey:@"parentNickname"]];
                 body1.replyInfo = [reply objectForKey:@"content"];
@@ -257,6 +263,9 @@
     if (_tableDataSource.count>0) {
         YMTextData *ym = [_tableDataSource objectAtIndex:indexPath.row];
         BOOL unfold = ym.foldOrNot;
+        if (ym.messageBody.videoUrl.length>0) {
+            return TableHeader + kLocationToBottom + ym.replyHeight + ym.showImageHeight  + kDistance + (ym.islessLimit?0:30) + (unfold?ym.shuoshuoHeight:ym.unFoldShuoHeight) + kReplyBtnDistance + ym.favourHeight + (ym.favourHeight == 0?0:kReply_FavourDistance)+180;
+        }
         return TableHeader + kLocationToBottom + ym.replyHeight + ym.showImageHeight  + kDistance + (ym.islessLimit?0:30) + (unfold?ym.shuoshuoHeight:ym.unFoldShuoHeight) + kReplyBtnDistance + ym.favourHeight + (ym.favourHeight == 0?0:kReply_FavourDistance);
     }
     return 0;
@@ -425,13 +434,18 @@
     
     [self.operationView dismiss];
     YMTextData *ymData = (YMTextData *)[_tableDataSource objectAtIndex:index];
-    WFReplyBody *b = [ymData.messageBody.posterReplies objectAtIndex:replyIndex];
-    
-    UIPasteboard *pboard = [UIPasteboard generalPasteboard];
-    pboard.string = b.replyInfo;
+    if (replyIndex!=-1) {
+        WFReplyBody *b = [ymData.messageBody.posterReplies objectAtIndex:replyIndex];
+        
+        UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+        pboard.string = b.replyInfo;
+
+    }
     
 }
-
+-(void)clickReplyNickNameWithReplyIndex:(NSInteger)replyIndex viewCell:(YMTableViewCell*)cell{
+    
+}
 #pragma mark - 点评论整块区域的回调
 - (void)clickRichText:(NSInteger)index replyIndex:(NSInteger)replyIndex{
     
@@ -440,14 +454,12 @@
     _replyIndex = replyIndex;
     
     YMTextData *ymData = (YMTextData *)[_tableDataSource objectAtIndex:index];
+     if (replyIndex!=-1) {
     WFReplyBody *b = [ymData.messageBody.posterReplies objectAtIndex:replyIndex];
     if ([b.replyUser isEqualToString:kAdmin]) {
         WFActionSheet *actionSheet = [[WFActionSheet alloc] initWithTitle:@"删除评论？" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"确定" otherButtonTitles:nil, nil];
         actionSheet.actionIndex = index;
         [actionSheet showInView:self.view];
-        
-        
-        
     }else{
         //回复
         if (replyView) {
@@ -459,6 +471,7 @@
         replyView.replyTag = index;
         [self.view addSubview:replyView];
     }
+     }
 }
 //点击send以后的动作
 #pragma mark - 评论说说回调
@@ -516,7 +529,7 @@
     }else{
         NSArray * arr=[resultDic objectForKey:@"commentList"];
         NSDictionary * comDic=[arr objectAtIndex:_replyIndex];
-        parentMemberId=[NSString stringWithFormat:@"%@",[comDic objectForKey:@"parentMemberId"]];
+        parentMemberId=[NSString stringWithFormat:@"%@",[comDic objectForKey:@"memberId"]];
     }
     NSString * circleID=[NSString stringWithFormat:@"%@",[resultDic objectForKey:@"circleId"]];
     CommentFriendCircleRequest * request =[[CommentFriendCircleRequest alloc]init];
@@ -599,23 +612,25 @@
                 
                 [self presentViewController:picker animated:YES completion:NULL];
             }
-            
+            //发表视频
+            if (buttonIndex==2) {
+                
+            }
             
         }else{
             if (buttonIndex == 0) {
                 //delete
                 YMTextData *ymData = (YMTextData *)[_tableDataSource objectAtIndex:actionSheet.actionIndex];
                 WFMessageBody *m = ymData.messageBody;
-                [m.posterReplies removeObjectAtIndex:_replyIndex];
-                ymData.messageBody = m;
-                [ymData.completionReplySource removeAllObjects];
-                [ymData.attributedDataReply removeAllObjects];
-                
-                
-                ymData.replyHeight = [ymData calculateReplyHeightWithWidth:self.view.frame.size.width];
-                [_tableDataSource replaceObjectAtIndex:actionSheet.actionIndex withObject:ymData];
-                
-                [self.tableView reloadData];
+                //删除评论
+                WFReplyBody *b = [m.posterReplies objectAtIndex:_replyIndex];
+                DeleteCircleCommentRequest * request =[[DeleteCircleCommentRequest alloc]init];
+                request.commentId=b.commentId;
+                [SystemAPI DeleteCircleCommentRequest:request success:^(DeleteCircleCommentResponse *response) {
+                    [self configDataWithPageSize:self.pageSize];
+                } fail:^(BOOL notReachable, NSString *desciption) {
+                    
+                }];
                 
             }else{
                 
@@ -738,7 +753,7 @@
     NSLog(@"sadadad");
 }
 -(void)postFriendCircle{
-    UIActionSheet * as =[[UIActionSheet alloc]initWithTitle:@"请选择您要发表的消息类型" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"照片",@"拍照上传", nil];
+    UIActionSheet * as =[[UIActionSheet alloc]initWithTitle:@"请选择您要发表的消息类型" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"照片",@"拍照上传",@"视频", nil];
     as.tag=777;
     [as showInView:self.view.window];
 }
@@ -758,6 +773,31 @@
             break;
     }
     
+}
+-(void)callWithNumber:(NSString *)phoneNmuber{
+    NSString * message =[NSString stringWithFormat:@"%@可能是一个电话号码，您是否需要拨打？",phoneNmuber];
+    
+    UIAlertController * al=[UIAlertController alertControllerWithTitle:@"温馨提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+    UIAlertAction * actionCancel=[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+        
+    }];
+    UIAlertAction * actionConfirm=[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+        [[UIApplication sharedApplication]openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",phoneNmuber]]];
+    }];
+    [al addAction:actionCancel];
+    [al addAction:actionConfirm];
+    [self presentViewController:al animated:YES completion:^{
+        
+    }];
+}
+-(void)playVideoWithPlayer:(AVPlayer *)player cell:(YMTableViewCell *)cell{
+    [player pause];
+    NSString * urlStr =cell.data.messageBody.videoUrl;
+    urlStr=[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSURL *url=[NSURL URLWithString:urlStr];
+    MPMoviePlayerViewController *movieViewController = [[MPMoviePlayerViewController alloc] initWithContentURL:url];
+    movieViewController.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
+    [self presentMoviePlayerViewControllerAnimated:movieViewController];
 }
 @end
 

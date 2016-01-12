@@ -13,4 +13,6 @@
 @property(nonatomic,strong) NSString * code;
 @property (nonatomic,strong) NSString* password;
 @property(nonatomic,strong) NSString * recommanderID;
+@property(nonatomic,strong) LMUserInfo * user;
+@property(nonatomic,strong) NSString * loginType;
 @end

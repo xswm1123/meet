@@ -8,7 +8,7 @@
 
 #import "MyCollectedStoresViewController.h"
 #import "StoresListTableViewCell.h"
-#import "StoreDetailsViewController.h";
+#import "StoreDetailsViewController.h"
 #define StoresListTableViewCellId @"StoresListTableViewCell"
 @interface MyCollectedStoresViewController ()<UITableViewDataSource,UITableViewDelegate>
 @property (weak, nonatomic) IBOutlet UITableView *tableView;

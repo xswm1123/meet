@@ -21,6 +21,7 @@
 #import "PostTextAndPictureViewController.h"
 #import "PersonalHomePageViewController.h"
 #import "PersonalFriendCircleViewController.h"
+#import "UploadVideoViewController.h"
 
 #define dataCount 10
 #define kLocationToBottom 20
@@ -54,12 +55,19 @@
 @property (nonatomic,assign) NSInteger pageSize;
 @property (nonatomic,strong) NSMutableArray * images;
 @property (nonatomic,strong) NSMutableArray * photos;
+@property (strong ,nonatomic) AVPlayer *player;//播放器，用于录制完视频后播放视频
+@property (strong,nonatomic) UIImagePickerController *imagePicker;
+@property (nonatomic,strong) NSString * videoUrl;
+
 @end
 
 @implementation FriendCircleViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    [IQKeyboardManager sharedManager].enableAutoToolbar=NO;
+    [ShareValue shareInstance].circleMessage=[NSNumber numberWithInt:0];
+    [ShareValue shareInstance].postMessage=nil;
     [self initView];
     self.pageSize=10;
     self.circleHeader=[[FriendCircleHeaderView alloc]init];
@@ -77,7 +85,7 @@
         [self.tableView.header endRefreshing];
     }];
     self.tableView.footer=[MJRefreshAutoNormalFooter footerWithRefreshingBlock:^{
-        if (self.pageSize<40) {
+        if (self.pageSize<1000) {
             self.pageSize+=10;
             [self configDataWithPageSize:self.pageSize];
         }else{
@@ -90,7 +98,11 @@
 }
 -(void)viewWillAppear:(BOOL)animated{
     [super viewWillAppear:animated];
-     [self configDataWithPageSize:self.pageSize];
+    Reachability  * manager= [Reachability reachabilityWithHostName: BASE_SERVERLURL];
+    NSLog(@"status:%ld",(long)[manager currentReachabilityStatus]);
+    if ([manager currentReachabilityStatus]>0) {
+        [self configDataWithPageSize:self.pageSize];
+    }
 }
 -(void)initView{
     /**
@@ -138,24 +150,22 @@
     [self updateViewConstraints];
 }
 - (void)configDataWithPageSize:(NSInteger)pageSize{
-    self.circleList=nil;
-    self.circleList=[NSMutableArray array];
-    _tableDataSource=nil;
-    _tableDataSource = [[NSMutableArray alloc] init];
-    _contentDataSource=nil;
-    _contentDataSource = [[NSMutableArray alloc] init];
+    
     _replyIndex = -1;//代表是直接评论
     /**
      加载数据
      */
     GetFriendCircleListRequest * request=[[GetFriendCircleListRequest alloc]init];
     if (pageSize!=0) {
-        request.pageSize=[NSString stringWithFormat:@"%d",pageSize];
+        request.pageSize=[NSString stringWithFormat:@"%ld",pageSize];
     }
     if (self.memberId.length>0) {
         request.memberId=self.memberId;
     }
     [SystemAPI GetFriendCircleListRequest:request success:^(GetFriendCircleListResponse *response) {
+        self.circleList=[NSMutableArray array];
+        _tableDataSource = [[NSMutableArray alloc] init];
+        _contentDataSource = [[NSMutableArray alloc] init];
         NSArray * arr=(NSArray*)response.data;
         self.circleList=[NSMutableArray arrayWithArray:arr];
         for (NSDictionary * dic in arr) {
@@ -172,13 +182,21 @@
             message.time=@"";
             message.circleId=[dic objectForKey:@"circleId"];
             message.memberId=[NSString stringWithFormat:@"%@",[dic objectForKey:@"memberId"]];
+            if ([[dic objectForKey:@"videoUrl"] isKindOfClass:[NSNull class]]) {
+                message.videoUrl=@"";
+            }else{
+                message.videoUrl=[dic objectForKey:@"videoUrl"];
+            }
             //回复部分
             NSArray * replies=[dic objectForKey:@"commentList"];
             NSMutableArray * bodys=[NSMutableArray array];
             for (NSDictionary * reply in replies) {
                 WFReplyBody *body1 = [[WFReplyBody alloc] init];
+                body1.commentId=[reply objectForKey:@"commentId"];
                 body1.replyUser = [reply objectForKey:@"nickname"];
+                body1.replyUserId=[NSString stringWithFormat:@"%@",[reply objectForKey:@"memberId"]];
                 body1.repliedUser = [NSString stringWithFormat:@"%@",[reply objectForKey:@"parentNickname"]];
+                 body1.repliedUserId=[NSString stringWithFormat:@"%@",[reply objectForKey:@"parentMemberId"]];
                 body1.replyInfo = [reply objectForKey:@"content"];
                 [bodys addObject:body1];
             }
@@ -243,9 +261,12 @@
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath {
-    if (_tableDataSource.count>0) {
+    if (_tableDataSource.count>indexPath.row) {
     YMTextData *ym = [_tableDataSource objectAtIndex:indexPath.row];
     BOOL unfold = ym.foldOrNot;
+        if (ym.messageBody.videoUrl.length>0) {
+            return TableHeader + kLocationToBottom + ym.replyHeight + ym.showImageHeight  + kDistance + (ym.islessLimit?0:30) + (unfold?ym.shuoshuoHeight:ym.unFoldShuoHeight) + kReplyBtnDistance + ym.favourHeight + (ym.favourHeight == 0?0:kReply_FavourDistance)+180;
+        }
     return TableHeader + kLocationToBottom + ym.replyHeight + ym.showImageHeight  + kDistance + (ym.islessLimit?0:30) + (unfold?ym.shuoshuoHeight:ym.unFoldShuoHeight) + kReplyBtnDistance + ym.favourHeight + (ym.favourHeight == 0?0:kReply_FavourDistance);
      }
     return 0;
@@ -263,7 +284,7 @@
     cell.replyBtn.appendIndexPath = indexPath;
     [cell.replyBtn addTarget:self action:@selector(replyMessage:) forControlEvents:UIControlEventTouchUpInside];
     cell.delegate = self;
-    if (_tableDataSource.count>0) {
+    if (indexPath.row<_tableDataSource.count) {
         [cell setYMViewWith:[_tableDataSource objectAtIndex:indexPath.row]];
         cell.data=[_tableDataSource objectAtIndex:indexPath.row];
     }
@@ -271,7 +292,6 @@
 }
 
 #pragma mark - 按钮动画
-
 - (void)replyAction:(YMButton *)sender{
     
     CGRect rectInTableView = [self.tableView rectForRowAtIndexPath:sender.appendIndexPath];
@@ -285,9 +305,6 @@
     YMTextData *ym = [_tableDataSource objectAtIndex:_selectedIndexPath.row];
     [self.operationView showAtView:self.tableView rect:targetRect isFavour:ym.hasFavour];
 }
-
-
-
 - (WFPopView *)operationView {
     if (!_operationView) {
         _operationView = [WFPopView initailzerWFOperationView];
@@ -308,7 +325,6 @@
     }
     return _operationView;
 }
-
 #pragma mark - 赞
 - (void)addLike{
     
@@ -335,8 +351,6 @@
     [self.tableView reloadData];
     
 }
-
-
 #pragma mark - 真の评论
 - (void)replyMessage:(YMButton *)sender{
      _selectedIndexPath = sender.appendIndexPath;
@@ -364,8 +378,6 @@
     [self.operationView dismiss];
     
 }
-
-
 #pragma mark -cellDelegate
 - (void)changeFoldState:(YMTextData *)ymD onCellRow:(NSInteger)cellStamp{
     
@@ -373,7 +385,6 @@
     [self.tableView reloadData];
     
 }
-
 #pragma mark - 图片点击事件回调
 - (void)showImageViewWithImageViews:(NSArray *)imageViews byClickWhich:(NSInteger)clickTag{
     self.images=[imageViews copy];
@@ -386,7 +397,7 @@
         [self.photos addObject:photo];
     }
     MWPhotoBrowser *browser = [[MWPhotoBrowser alloc] initWithDelegate:self];
-    browser.displayActionButton = NO;
+    browser.displayActionButton = YES;
     browser.displayNavArrows = YES;
     browser.displaySelectionButtons = NO;
     browser.alwaysShowControls = NO;
@@ -414,11 +425,11 @@
     
     [self.operationView dismiss];
     YMTextData *ymData = (YMTextData *)[_tableDataSource objectAtIndex:index];
-    WFReplyBody *b = [ymData.messageBody.posterReplies objectAtIndex:replyIndex];
-    
-    UIPasteboard *pboard = [UIPasteboard generalPasteboard];
-    pboard.string = b.replyInfo;
-    
+    if (replyIndex!=-1) {
+        WFReplyBody *b = [ymData.messageBody.posterReplies objectAtIndex:replyIndex];
+        UIPasteboard *pboard = [UIPasteboard generalPasteboard];
+        pboard.string = b.replyInfo;
+    }
 }
 
 #pragma mark - 点评论整块区域的回调
@@ -429,15 +440,15 @@
     _replyIndex = replyIndex;
     
     YMTextData *ymData = (YMTextData *)[_tableDataSource objectAtIndex:index];
+    if (replyIndex!=-1) {
+
     WFReplyBody *b = [ymData.messageBody.posterReplies objectAtIndex:replyIndex];
     if ([b.replyUser isEqualToString:kAdmin]) {
         WFActionSheet *actionSheet = [[WFActionSheet alloc] initWithTitle:@"删除评论？" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:@"确定" otherButtonTitles:nil, nil];
         actionSheet.actionIndex = index;
         [actionSheet showInView:self.view];
-        
-        
-        
-    }else{
+    }
+    else{
         //回复
         if (replyView) {
             return;
@@ -447,6 +458,8 @@
         replyView.lblPlaceholder.text = [NSString stringWithFormat:@"回复%@:",b.replyUser];
         replyView.replyTag = index;
         [self.view addSubview:replyView];
+    }
+        
     }
 }
 //点击send以后的动作
@@ -503,7 +516,7 @@
     }else{
         NSArray * arr=[dic objectForKey:@"commentList"];
         NSDictionary * comDic=[arr objectAtIndex:_replyIndex];
-        parentMemberId=[NSString stringWithFormat:@"%@",[comDic objectForKey:@"parentMemberId"]];
+        parentMemberId=[NSString stringWithFormat:@"%@",[comDic objectForKey:@"memberId"]];
     }
     NSString * circleID=[NSString stringWithFormat:@"%@",[dic objectForKey:@"circleId"]];
     CommentFriendCircleRequest * request =[[CommentFriendCircleRequest alloc]init];
@@ -511,7 +524,7 @@
     request.parentMemberId=parentMemberId;
     request.circleId=circleID;
     [SystemAPI CommentFriendCircleRequest:request success:^(CommentFriendCircleResponse *response) {
-        
+        [self configDataWithPageSize:self.pageSize];
     } fail:^(BOOL notReachable, NSString *desciption) {
         
     }];
@@ -585,24 +598,25 @@
                 
                 [self presentViewController:picker animated:YES completion:NULL];
             }
-
+            //发表视频
+            if (buttonIndex==2) {
+                [self postVideo];
+            }
             
         }else{
             if (buttonIndex == 0) {
             //delete
             YMTextData *ymData = (YMTextData *)[_tableDataSource objectAtIndex:actionSheet.actionIndex];
-            WFMessageBody *m = ymData.messageBody;
-            [m.posterReplies removeObjectAtIndex:_replyIndex];
-            ymData.messageBody = m;
-            [ymData.completionReplySource removeAllObjects];
-            [ymData.attributedDataReply removeAllObjects];
-            
-            
-            ymData.replyHeight = [ymData calculateReplyHeightWithWidth:self.view.frame.size.width];
-            [_tableDataSource replaceObjectAtIndex:actionSheet.actionIndex withObject:ymData];
-            
-            [self.tableView reloadData];
-            
+             WFMessageBody *m = ymData.messageBody;
+                //删除评论
+                WFReplyBody *b = [m.posterReplies objectAtIndex:_replyIndex];
+                DeleteCircleCommentRequest * request =[[DeleteCircleCommentRequest alloc]init];
+                request.commentId=b.commentId;
+                [SystemAPI DeleteCircleCommentRequest:request success:^(DeleteCircleCommentResponse *response) {
+                    [self configDataWithPageSize:self.pageSize];
+                } fail:^(BOOL notReachable, NSString *desciption) {
+                    
+                }];
         }else{
             
         }}
@@ -632,6 +646,20 @@
         [picker dismissViewControllerAnimated:YES completion:^{
             [self performSegueWithIdentifier:@"pictureMessage" sender:@[image]];
         }];
+    }
+    if (picker==self.imagePicker) {
+         NSString *mediaType=[info objectForKey:UIImagePickerControllerMediaType];
+        if([mediaType isEqualToString:(NSString *)kUTTypeMovie]){//如果是录制视频
+            NSLog(@"video...");
+            NSURL *url=[info objectForKey:UIImagePickerControllerMediaURL];//视频路径
+            NSString *urlStr=[url path];
+            self.videoUrl=urlStr;
+            if (UIVideoAtPathIsCompatibleWithSavedPhotosAlbum(urlStr)) {
+                //保存视频到相簿，注意也可以使用ALAssetsLibrary来保存
+                UISaveVideoAtPathToSavedPhotosAlbum(urlStr, self, @selector(video:didFinishSavingWithError:contextInfo:), nil);//保存视频到相簿
+            }
+        }
+         [self dismissViewControllerAnimated:YES completion:nil];
     }
 }
 #pragma mark - ZYQAssetPickerController Delegate
@@ -726,8 +754,18 @@
     vc.memberId=[ShareValue shareInstance].userInfo.id;
     [self.navigationController pushViewController:vc animated:YES];
 }
+//点击回复的名字
+-(void)clickReplyNickNameWithReplyIndex:(NSInteger)replyIndex viewCell:(YMTableViewCell *)cell{
+    UIStoryboard * sb =[UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    PersonalFriendCircleViewController * vc=[sb instantiateViewControllerWithIdentifier:@"PersonalFriendCircleViewController"];
+    NSLog(@"replyIndex:%ld",replyIndex);
+    NSArray * commentList=cell.data.messageBody.posterReplies;
+    WFReplyBody * body =[commentList objectAtIndex:replyIndex];
+    vc.memberId=body.replyUserId;
+    [self.navigationController pushViewController:vc animated:YES];
+}
 -(void)postFriendCircle{
-    UIActionSheet * as =[[UIActionSheet alloc]initWithTitle:@"请选择您要发表的消息类型" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"照片",@"拍照上传", nil];
+    UIActionSheet * as =[[UIActionSheet alloc]initWithTitle:@"请选择您要发表的消息类型" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"照片",@"拍照上传",@"视频", nil];
     as.tag=777;
     [as showInView:self.view.window];
 }
@@ -747,5 +785,69 @@
             break;
     }
     
+}
+-(void)callWithNumber:(NSString *)phoneNmuber{
+    NSString * message =[NSString stringWithFormat:@"%@可能是一个电话号码，您是否需要拨打？",phoneNmuber];
+   
+        UIAlertController * al=[UIAlertController alertControllerWithTitle:@"温馨提示" message:message preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction * actionCancel=[UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:^(UIAlertAction * _Nonnull action) {
+            
+        }];
+        UIAlertAction * actionConfirm=[UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [[UIApplication sharedApplication]openURL:[NSURL URLWithString:[NSString stringWithFormat:@"tel://%@",phoneNmuber]]];
+        }];
+        [al addAction:actionCancel];
+        [al addAction:actionConfirm];
+    [self presentViewController:al animated:YES completion:^{
+        
+    }];
+
+}
+-(void)playVideoWithPlayer:(AVPlayer *)player cell:(YMTableViewCell *)cell{
+    [player pause];
+    NSString * urlStr =cell.data.messageBody.videoUrl;
+    urlStr=[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+    NSURL *url=[NSURL URLWithString:urlStr];
+    MPMoviePlayerViewController *movieViewController = [[MPMoviePlayerViewController alloc] initWithContentURL:url];
+    movieViewController.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
+    [self presentMoviePlayerViewControllerAnimated:movieViewController];
+}
+//录制小视频上传
+-(void)postVideo{
+    NSLog(@"postVideo");
+    [self presentViewController:self.imagePicker animated:YES completion:nil];
+}
+#pragma mark - 私有方法
+-(UIImagePickerController *)imagePicker{
+    if (!_imagePicker) {
+        _imagePicker=[[UIImagePickerController alloc]init];
+        
+        _imagePicker.sourceType=UIImagePickerControllerSourceTypeCamera;//设置image picker的来源，这里设置为摄像头
+        _imagePicker.cameraDevice=UIImagePickerControllerCameraDeviceRear;//设置使用哪个摄像头，这里设置为后置摄像头
+        _imagePicker.mediaTypes=@[(NSString *)kUTTypeMovie];
+        _imagePicker.videoQuality=UIImagePickerControllerQualityType640x480;//wifi
+        _imagePicker.cameraCaptureMode=UIImagePickerControllerCameraCaptureModeVideo;//设置摄像头模式（拍照，录制视频）
+        _imagePicker.videoMaximumDuration=15.0;
+        _imagePicker.allowsEditing=YES;//允许编辑
+        
+        _imagePicker.delegate=self;//设置代理，检测操作
+    }
+    return _imagePicker;
+}
+
+//视频保存后的回调
+- (void)video:(NSString *)videoPath didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo{
+    if (error) {
+        NSLog(@"保存视频过程中发生错误，错误信息:%@",error.localizedDescription);
+    }else{
+        NSLog(@"视频保存成功.");
+        //录制完之后自动播放
+        NSURL *url=[NSURL fileURLWithPath:videoPath];
+        UIStoryboard * sb =[UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        UploadVideoViewController * vc =[sb instantiateViewControllerWithIdentifier:@"UploadVideoViewController"];
+        vc.url=url;
+        vc.mark=@"postVideo";
+        [self.navigationController pushViewController:vc animated:YES];
+    }
 }
 @end

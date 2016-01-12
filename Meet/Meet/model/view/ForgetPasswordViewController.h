@@ -9,5 +9,5 @@
 #import "BaseViewController.h"
 
 @interface ForgetPasswordViewController : BaseViewController
-
+@property(nonatomic,strong) NSString * blind;
 @end

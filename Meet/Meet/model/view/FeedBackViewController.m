@@ -29,7 +29,7 @@
     self.tv_content.layer.borderColor=iconYellow.CGColor;
     self.tv_content.layer.borderWidth=1;
     self.tv_content.clipsToBounds=YES;
-    self.tv_content.placeholder=@"请输入您宝贵的意见...";
+    self.tv_content.placeholder=@"请输入您宝贵的意见...一经采纳，我们将赠送金币及VIP以示奖励！";
 }
 - (IBAction)chooseFeedType:(id)sender {
     UIActionSheet * as=[[UIActionSheet alloc]initWithTitle:@"请选择反馈类型" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"咨询",@"投诉",@"建议", nil];

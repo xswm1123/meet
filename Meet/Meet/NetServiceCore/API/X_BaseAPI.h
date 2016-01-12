@@ -10,6 +10,7 @@
 #import "X_BaseHttpRequest.h"
 #import "X_BaseHttpResponse.h"
 #import "MBProgressHUD.h"
+#import "SystemHttpResponse.h"
 
 @interface X_BaseAPI : NSObject
 /**
@@ -39,6 +40,16 @@
  *  @param responseClass 
  */
 +(void)getHttpRequest:(X_BaseHttpRequest *)request apiPath:(NSString *)path Success:(void (^)(X_BaseHttpResponse *))sucess fail:(void (^)(BOOL NotReachable,NSString *))fail class:(Class)responseClass;
+/**
+ *  GET请求，返回ID类型的对象
+ *
+ *  @param request
+ *  @param path
+ *  @param sucess
+ *  @param fail
+ *  @param getHttpRequest
+ */
++(void)getHttpRequest:(X_BaseHttpRequest *)request apiPath:(NSString *)path Success:(void (^)(id data))sucess fail:(void (^)(BOOL NotReachable,NSString *descript))fail;
 /**
  *  MD5加密接口
  *
@@ -70,7 +81,7 @@
  *  @param fail
  *  @param responseClass 
  */
-+(void)downLoadFilesWithURL:(NSString*)path Success:(void (^)(X_BaseHttpResponse * response))sucess fail:(void (^)(BOOL NotReachable,NSString *description))fail;
++(void)downLoadFilesWithURL:(NSString*)path Success:(void (^)(X_BaseHttpResponse * response,NSURL *filePath))sucess fail:(void (^)(BOOL NotReachable,NSString *description))fail;
 /**
  *  上传视频
  *

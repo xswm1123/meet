@@ -9,7 +9,7 @@
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
-	<string>com.immet.meet</string>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
@@ -17,19 +17,13 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>1.0.6</string>
+	<string>1.1.5</string>
 	<key>CFBundleSignature</key>
 	<string>????</string>
+	<key>CFBundleSupportedPlatforms</key>
+	<string>iPhoneOS</string>
 	<key>CFBundleURLTypes</key>
 	<array>
-		<dict>
-			<key>CFBundleTypeRole</key>
-			<string>Editor</string>
-			<key>CFBundleURLSchemes</key>
-			<array>
-				<string>alisdkdemo</string>
-			</array>
-		</dict>
 		<dict>
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
@@ -62,13 +56,63 @@
 				<string>tencent1104258257</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>alimeet</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>tencent1104785801</string>
+			</array>
+		</dict>
 	</array>
 	<key>CFBundleVersion</key>
-	<string>1.0.6</string>
-	<key>LSApplicationCategoryType</key>
-	<string></string>
+	<string>1.1.5</string>
 	<key>LSApplicationQueriesSchemes</key>
-	<string>alisdkdemo</string>
+	<array>
+		<string>wechat</string>
+		<string>weixin</string>
+		<string>sinaweibohd</string>
+		<string>sinaweibo</string>
+		<string>sinaweibosso</string>
+		<string>weibosdk</string>
+		<string>weibosdk2.5</string>
+		<string>mqqapi</string>
+		<string>mqq</string>
+		<string>mqqOpensdkSSoLogin</string>
+		<string>mqqconnect</string>
+		<string>mqqopensdkdataline</string>
+		<string>mqqopensdkgrouptribeshare</string>
+		<string>mqqopensdkfriend</string>
+		<string>mqqopensdkapi</string>
+		<string>mqqopensdkapiV2</string>
+		<string>mqqopensdkapiV3</string>
+		<string>mqzoneopensdk</string>
+		<string>wtloginmqq</string>
+		<string>wtloginmqq2</string>
+		<string>mqqwpa</string>
+		<string>mqzone</string>
+		<string>mqzonev2</string>
+		<string>mqzoneshare</string>
+		<string>wtloginqzone</string>
+		<string>mqzonewx</string>
+		<string>mqzoneopensdkapiV2</string>
+		<string>mqzoneopensdkapi19</string>
+		<string>mqzoneopensdkapi</string>
+		<string>mqzoneopensdk</string>
+		<string>alipayshare</string>
+		<string>alipayauth</string>
+		<string>alipay</string>
+		<string>safepay</string>
+		<string>alimeet</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSAppTransportSecurity</key>
@@ -84,7 +128,6 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
-		<string>audio</string>
 		<string>fetch</string>
 	</array>
 	<key>UILaunchStoryboardName</key>

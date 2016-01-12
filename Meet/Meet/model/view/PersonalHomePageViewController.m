@@ -21,6 +21,8 @@
 #import "FriendCircleViewController.h"
 #import "StoreCenterViewController.h"
 #import "PersonalFriendCircleViewController.h"
+#import "RechargeVipViewController.h"
+#import "VideoDetailsViewController.h"
 
 #define Files @"filesCell"
 #define Groups @"groupsCell"
@@ -83,6 +85,9 @@
 @property (nonatomic,strong) NSMutableArray * imageUrls;
 @property (nonatomic,assign) NSInteger  imageCount;
 @property (nonatomic,strong) UILabel * warningLabel;
+//VIP charge
+@property (nonatomic,strong) BaseButton * vipChargeBtn;
+
 @end
 @implementation PersonalHomePageViewController
 
@@ -145,6 +150,11 @@
     
     [self clear];
     self.btn_homePage.selected=YES;
+    if ([self.mark isEqualToString:@"video"]) {
+        self.btn_homePage.selected=NO;
+        self.btn_groups.selected=YES;
+        [self showGroups:nil];
+    }
     self.btn_homePage.backgroundColor=cellColor;
     UIView * fview=[self.btnBgs objectAtIndex:0];
     fview.backgroundColor=TempleColor;
@@ -169,15 +179,33 @@
     /**
      *  init data
      */
-    self.filesOptions=@[@"等级身份",@"个人财富",@"相遇ID",@"个性签名",@"感情状况",@"外貌特点",@"职业性质",@"兴趣爱好"];
+    self.filesOptions=@[@"等级身份",@"个人财富",@"相遇ID",@"个性签名"];
     /**
      *  加载默认的数据
      */
     [self loadDefaultData];
     /**
-     *  创建展示照片scroll
+     *  创建提示充值VIP
      *
      */
+    if (self.memberId.length>0) {
+        self.vipChargeBtn =[[BaseButton alloc]initWithFrame:CGRectMake(20, self.view.frame.size.height+20, DEVCE_WITH-40, 36)];
+        self.vipChargeBtn.userInteractionEnabled=YES;
+        [self.vipChargeBtn setTitleColor:[UIColor whiteColor] forState:UIControlStateNormal];
+        NSAttributedString * title=[[NSAttributedString alloc]initWithString:@"您还不是会员,请前往会员中心充值,查看更多~" attributes:@{NSFontAttributeName:[UIFont systemFontOfSize:13],NSForegroundColorAttributeName:[UIColor whiteColor]}];
+        [self.vipChargeBtn setAttributedTitle:title forState:UIControlStateNormal];
+        [self.vipChargeBtn addTarget:self action:@selector(showVipCharge) forControlEvents:UIControlEventTouchUpInside];
+        [self.vipChargeBtn setHidden:YES];
+//        [self.scrollView addSubview:self.vipChargeBtn];
+//        [self.scrollView bringSubviewToFront:self.vipChargeBtn];
+        [self.scrollView insertSubview:self.vipChargeBtn atIndex:10000];
+    }
+    
+}
+-(void)showVipCharge{
+    UIStoryboard * sb =[UIStoryboard storyboardWithName:@"Main" bundle:nil];
+    RechargeVipViewController * vc=[sb instantiateViewControllerWithIdentifier:@"RechargeVipViewController"];
+    [self.navigationController pushViewController:vc animated:YES];
 }
 -(void)viewDidAppear:(BOOL)animated{
     [super viewDidAppear:animated];
@@ -189,7 +217,6 @@
     if ([self.btn_albums isSelected]) {
         [self showImages];
     }
-    
 }
 -(void)loadDefaultData{
     GetHomePageInfoRequest * request  = [[GetHomePageInfoRequest alloc]init];
@@ -209,6 +236,7 @@
         NSDictionary * infoDic=response.data;
         self.detailsInfoDic = [response.data copy];
         [self.btn_albums setTitle:[NSString stringWithFormat:@"相册(%@)",[infoDic objectForKey:@"picCount"]] forState:UIControlStateNormal];
+        [self.btn_groups setTitle:[NSString stringWithFormat:@"视频(%@)",[infoDic objectForKey:@"videoCount"]] forState:UIControlStateNormal];
         
         self.lb_iconZan.text=[NSString stringWithFormat:@"  \U0000e61e%@",[infoDic objectForKey:@"zanCount"]];
         self.lb_meili.text=[NSString stringWithFormat:@"%@",[infoDic objectForKey:@"meili"]];
@@ -216,9 +244,17 @@
         self.navigationItem.title=[infoDic objectForKey:@"nickname"];
         [self.photoIV sd_setImageWithURL:[NSURL URLWithString:[infoDic objectForKey:@"avatar"]] placeholderImage:placeHolder];
         NSArray * imgArr=[infoDic objectForKey:@"picUrlList"];
-        
-        [self.coverImageView sd_setImageWithURL:[NSURL URLWithString:[imgArr firstObject]] placeholderImage:circlePlaceHolder];
-        self.filesArr=@[[infoDic objectForKey:@"level"],[infoDic objectForKey:@"gold"],[infoDic objectForKey:@"meetid"],[infoDic objectForKey:@"sign"],[infoDic objectForKey:@"affection"],[infoDic objectForKey:@"appearance"],[infoDic objectForKey:@"profession"],[infoDic objectForKey:@"hobby"]];
+        if (imgArr.count>0) {
+            [self.coverImageView sd_setImageWithURL:[NSURL URLWithString:[imgArr firstObject]] placeholderImage:circlePlaceHolder];
+        }else{
+            [self.coverImageView sd_setImageWithURL:[NSURL URLWithString:[infoDic objectForKey:@"avatar"]] placeholderImage:circlePlaceHolder];
+        }
+        NSString * sign=[infoDic objectForKey:@"sign"];
+        if ([sign isEqualToString:[infoDic objectForKey:@"affection"]]) {
+            sign=@"相遇有你更精彩！";
+        }
+        self.filesArr=@[[infoDic objectForKey:@"level"],[infoDic objectForKey:@"gold"],[infoDic objectForKey:@"meetid"],sign];
+//          self.filesArr=@[[infoDic objectForKey:@"level"],[infoDic objectForKey:@"gold"],[infoDic objectForKey:@"meetid"],sign,[infoDic objectForKey:@"affection"],[infoDic objectForKey:@"appearance"],[infoDic objectForKey:@"profession"],[infoDic objectForKey:@"hobby"]];
         //地址
         NSString * address=[infoDic objectForKey:@"address"];
         NSArray * arr=[address componentsSeparatedByString:@"市"];
@@ -329,7 +365,6 @@
         }else{
             vc.memberId=[ShareValue shareInstance].userInfo.id;
         }
-        
     }
     if ([segue.identifier isEqualToString:@"collect"]) {
         MyCollectedStoresViewController * vc=segue.destinationViewController;
@@ -338,7 +373,6 @@
         }else{
             vc.memberId=[ShareValue shareInstance].userInfo.id;
         }
-
     }
     if ([segue.identifier isEqualToString:@"friendCircle"]) {
         PersonalFriendCircleViewController * vc=[segue  destinationViewController];
@@ -360,6 +394,7 @@
 }
 - (IBAction)showHomePage:(id)sender {
     [self clear];
+    self.vipChargeBtn.hidden=YES;
     self.btn_homePage.selected=YES;
     self.btn_homePage.backgroundColor=cellColor;
     UIView * fview=[self.btnBgs objectAtIndex:0];
@@ -372,6 +407,8 @@
 - (IBAction)showGroups:(id)sender {
     [self clear];
     self.btn_groups.selected=YES;
+    self.vipChargeBtn.frame=CGRectMake(20, self.view.frame.size.height+90, DEVCE_WITH-40, 36);
+    [self.scrollView addSubview:self.vipChargeBtn];
     self.btn_groups.backgroundColor=cellColor;
     UIView * fview=[self.btnBgs objectAtIndex:1];
     fview.backgroundColor=TempleColor;
@@ -382,20 +419,38 @@
    
     GetMyVideosRequest * request =[[GetMyVideosRequest alloc]init];
     if (self.memberId.length>0 ) {
-        request.memberId=self.memberId;
+        request.targetId=self.memberId;
     }else{
-        request.memberId=[ShareValue shareInstance].userInfo.id;
+        request.targetId=[ShareValue shareInstance].userInfo.id;
     }
-    request.pageSize=@"50";
+    request.pageSize=@"10000";
     [SystemAPI GetMyVideosRequest:request success:^(GetMyVideosResponse *response) {
         self.videoList=[NSMutableArray arrayWithArray:(NSArray*)response.data];
         [self.tableView reloadData];
+        if ([[ShareValue shareInstance].userInfo.type integerValue]==1) {
+//            if (self.videoList.count>0 ) {
+                self.vipChargeBtn.hidden=NO;
+            self.vipChargeBtn.frame=CGRectMake(20, 360, DEVCE_WITH-40, 36);
+//            }else{
+//                self.vipChargeBtn.hidden=YES;
+//            }
+        }else{
+            self.vipChargeBtn.hidden=YES;
+        }
+       
     } fail:^(BOOL notReachable, NSString *desciption) {
         [MBProgressHUD hideAllHUDsForView:ShareAppDelegate.window animated:YES];
-        
+        if ([[ShareValue shareInstance].userInfo.type integerValue]==1) {
+            //            if (self.videoList.count>0 ) {
+            self.vipChargeBtn.hidden=NO;
+            self.vipChargeBtn.frame=CGRectMake(20, 360, DEVCE_WITH-40, 36);
+            //            }else{
+            //                self.vipChargeBtn.hidden=YES;
+            //            }
+        }else{
+            self.vipChargeBtn.hidden=YES;
+        }
     }];
-
-    
 }
 - (IBAction)showAlbums:(id)sender {
     [self clear];
@@ -412,6 +467,18 @@
     NSArray * subs=[self.imageScroll subviews];
     for (id view in subs) {
         [view removeFromSuperview];
+    }
+    self.vipChargeBtn.hidden=YES;
+    if ([[ShareValue shareInstance].userInfo.type integerValue]==1) {
+        self.vipChargeBtn.frame=CGRectMake(20, 200, DEVCE_WITH-40, 36);
+        [self.imageScroll addSubview:self.vipChargeBtn];
+        if (self.albumList.count>0 ) {
+            self.vipChargeBtn.hidden=NO;
+        }else{
+            self.vipChargeBtn.hidden=YES;
+        }
+    }else{
+        self.vipChargeBtn.hidden=YES;
     }
     CGFloat imageWidth=(DEVCE_WITH-50)/4;
     for (int i =0; i<self.albumList.count; i++) {
@@ -494,13 +561,14 @@
 
 - (IBAction)showGifts:(id)sender {
     [self clear];
+    self.vipChargeBtn.hidden=YES;
     self.btn_gifts.selected=YES;
     self.btn_gifts.backgroundColor=cellColor;
     UIView * fview=[self.btnBgs objectAtIndex:3];
     fview.backgroundColor=TempleColor;
      self.imageScroll.hidden=YES;
     self.tableView.hidden=NO;
-    self.tableView.scrollEnabled=NO;
+    self.tableView.scrollEnabled=YES;
     [self.tableView reloadData];
     GetHomePageGiftsRequest * request=[[GetHomePageGiftsRequest alloc]init];
     if (!self.memberId) {
@@ -515,6 +583,7 @@
          */
         request.memberId=self.memberId;
     }
+    request.pageSize=10000;
     [SystemAPI GetHomePageGiftsRequest:request success:^(GetHomePageGiftsResponse *response) {
         self.giftsArr=(NSArray *)response.data;
         [self.tableView reloadData];
@@ -600,7 +669,7 @@
 -(NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
     if ([self.btn_homePage isSelected]) {
         if (section==0) {
-            return 8;
+            return self.filesOptions.count;
         }
         if (section==1) {
             return 1;
@@ -630,12 +699,20 @@
     //视频
     if ([self.btn_groups isSelected]) {
         NSDictionary * dic =[self.videoList objectAtIndex:indexPath.row];
-        NSString *urlStr=[dic objectForKey:@"video"];
-        urlStr=[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
-        NSURL *url=[NSURL URLWithString:urlStr];
-        MPMoviePlayerViewController *movieViewController = [[MPMoviePlayerViewController alloc] initWithContentURL:url];
-        movieViewController.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
-        [self presentMoviePlayerViewControllerAnimated:movieViewController];
+        NSString * videoId=[NSString stringWithFormat:@"%@",[dic objectForKey:@"id"]];
+        NSMutableDictionary * dics=[NSMutableDictionary dictionaryWithDictionary:dic];
+        [dics removeObjectForKey:@"id"];
+        [dics setObject:videoId forKey:@"videoId"];
+//        NSString *urlStr=[dic objectForKey:@"video"];
+//        urlStr=[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+//        NSURL *url=[NSURL URLWithString:urlStr];
+//        MPMoviePlayerViewController *movieViewController = [[MPMoviePlayerViewController alloc] initWithContentURL:url];
+//        movieViewController.moviePlayer.scalingMode = MPMovieScalingModeAspectFit;
+//        [self presentMoviePlayerViewControllerAnimated:movieViewController];
+        UIStoryboard * sb =[UIStoryboard storyboardWithName:@"Main" bundle:nil];
+        VideoDetailsViewController * vc=[sb instantiateViewControllerWithIdentifier:@"VideoDetailsViewController"];
+        vc.infoDic=dics;
+        [self.navigationController pushViewController:vc animated:YES];
     }
 }
 -(CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section{
@@ -771,8 +848,36 @@
         }];
     }
     }
+    if (alertView.tag==8) {
+        if (buttonIndex==1) {
+            [UMSocialData defaultData].extConfig.wechatTimelineData.url = @"http://www.immet.cm";
+            [UMSocialData defaultData].extConfig.wechatTimelineData.title = @"相遇比陌陌更懂你";
+            [[UMSocialDataService defaultDataService]  postSNSWithTypes:@[UMShareToWechatTimeline] content:UmengShareContent image:[UIImage imageNamed:@"icon_180.png"] location:nil urlResource:nil presentedController:self completion:^(UMSocialResponseEntity *response){
+                if (response.responseCode == UMSResponseCodeSuccess) {
+                    NSLog(@"分享成功！");
+                    [self shareCallBackAction];
+                }
+            }];
+        }
+    }
 }
 - (IBAction)sendMessageAction:(id)sender {
+    
+    if ([ShareValue shareInstance].userInfo.type.integerValue==2) {
+//        if (!self.rightLabel.isHidden) {
+//            [MBProgressHUD showError:@"你还不是VIP，无法发起聊天！" toView:self.view.window];
+//            return;
+//        }
+    }else{
+        if (![ShareValue shareInstance].userInfo.isShare) {
+//            [MBProgressHUD showError:@"请分享一条信息到朋友圈或者充值VIP，否则无法发起聊天哦！" toView:self.view.window];
+//            return;
+            UIAlertView * al=[[UIAlertView alloc]initWithTitle:@"温馨提示" message:@"请分享一条信息到朋友圈或者充值VIP，否则无法发起聊天哦！" delegate:self cancelButtonTitle:@"取消" otherButtonTitles:@"去分享", nil];
+            al.tag=8;
+            [al show];
+            return;
+        }
+    }
     RCConversationModel * model=[[RCConversationModel alloc]init:
                                  RC_CONVERSATION_MODEL_TYPE_NORMAL exntend:nil];
     model.conversationType=ConversationType_PRIVATE;
@@ -895,4 +1000,17 @@
         [MBProgressHUD showError:desciption toView:ShareAppDelegate.window];
     }];
 }
+/**
+ *  分享回调
+ */
+-(void)shareCallBackAction{
+    ShareCallBackRequest * request =[[ShareCallBackRequest alloc]init];
+    [SystemAPI ShareCallBackRequest:request success:^(ShareCallBackResponse *response) {
+        LMUserInfo * user=[[LMUserInfo alloc]initWithDictionary:response.data];
+        [ShareValue shareInstance].userInfo=user;
+    } fail:^(BOOL notReachable, NSString *desciption) {
+        
+    }];
+}
+
 @end

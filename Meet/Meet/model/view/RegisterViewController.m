@@ -92,7 +92,6 @@ static NSUInteger count=60;
         [MBProgressHUD showError:@"请先同意注册条款！" toView:self.view];
         return NO;
     }
-    
     return YES&&[self isRightNumber];
 }
 - (IBAction)agreeAction:(id)sender {
@@ -136,6 +135,9 @@ static NSUInteger count=60;
         }
     }
     return YES;
+}
+- (IBAction)agreementAction:(id)sender {
+    [self performSegueWithIdentifier:@"agreement" sender:nil];
 }
 
 @end

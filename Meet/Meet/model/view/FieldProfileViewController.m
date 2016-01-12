@@ -49,8 +49,15 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     [self initView];
+    if (self.user.nickname.length>0) {
+        UIImage * image =[UIImage imageWithData:[NSData dataWithContentsOfURL:[NSURL URLWithString:self.user.avatar]]];
+        [self.photoBtn setImage:image forState:UIControlStateNormal];
+        self.photoImage=image;
+        self.tf_nickName.text=self.user.nickname;
+    }
 }
 -(void)initView{
+    self.maleBtn.selected=YES;
     self.saveBtn.layer.shadowOffset=CGSizeMake(0, 2);
     self.saveBtn.layer.shadowColor=TempleColor.CGColor;
     self.saveBtn.layer.shadowRadius=0;
@@ -252,14 +259,45 @@
         NSDateFormatter *formatter = [NSDateFormatter new];
         [formatter setDateFormat:@"yyMMddHHmmss"];
         NSString *fileName = [NSString stringWithFormat:@"%@IMG_%@",self.title,[formatter stringFromDate:now]];
-        self.photoImage=[ImageInfo makeThumbnailFromImage:self.photoImage scale:0.2];
+//        self.photoImage=[ImageInfo makeThumbnailFromImage:self.photoImage scale:0.2];
         ImageInfo * details=[[ImageInfo alloc]initWithImage:self.photoImage];
         [X_BaseAPI uploadFile:details.fileData name:fileName fileName:details.fileName mimeType:details.mimeType Success:^(X_BaseHttpResponse * response) {
             NSArray * arr=(NSArray*)response.data;
             NSString* url=[arr firstObject];
             NSLog(@"url:%@",url);
+            if (self.user.nickname.length>0) {
+                /**
+                 *  第三方注册
+                 */
+                RegisterExternRequest * request=[[RegisterExternRequest alloc]init];
+                request.avatar=url;
+                request.nickname=self.tf_nickName.text;
+                request.birthday=self.lb_birthday.text;
+                request.address=self.lb_city.text;
+                if ([self.maleBtn isSelected]) {
+                    request.sex=@"1";
+                }else{
+                    request.sex=@"2";
+                }
+                request.openid=self.user.id;
+                request.loginType=self.loginType;
+                [SystemAPI RegisterExternRequest:request success:^(RegisterExternResponse *response) {
+                    [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+                    [MBProgressHUD showSuccess:response.message toView:ShareAppDelegate.window];
+                    LMUserInfo * user=[[LMUserInfo alloc]initWithDictionary:response.data];
+                    [ShareValue shareInstance].userInfo=user;
+                    RCUserInfo * info=[[RCUserInfo alloc]initWithUserId:[response.data objectForKey:@"id"] name:[response.data objectForKey:@"mobile"] portrait:[response.data objectForKey:@"avatar"]];
+                    [ShareValue shareInstance].RCUser=info;
+                    [ShareValue shareInstance].password=self.password;
+                    [self loginInRCM];
+                    [self showIndexVC];
+                } fail:^(BOOL notReachable, NSString *desciption) {
+                    [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
+                    [MBProgressHUD showError:desciption toView:self.view.window];
+                }];
+            }else{
             /**
-             注册
+             正常注册
              */
             RegisterRequest * request=[[RegisterRequest alloc]init];
             request.mobile=self.phoneNmuber;
@@ -281,13 +319,12 @@
             [SystemAPI RegisterRequest:request success:^(RegisterResponse *response) {
                 [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
                 [MBProgressHUD showSuccess:response.message toView:ShareAppDelegate.window];
-//                [self.navigationController popToViewController: [self.navigationController.viewControllers objectAtIndex:0] animated:YES];
                 [self loginAction];
             } fail:^(BOOL notReachable, NSString *desciption) {
                 [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
                 [MBProgressHUD showError:desciption toView:self.view.window];
             }];
-            
+            }//end
         } fail:^(BOOL NotReachable, NSString *descript) {
             [MBProgressHUD hideAllHUDsForView:self.view.window animated:YES];
             [MBProgressHUD showError:descript toView:self.view.window];
@@ -399,8 +436,18 @@
     if (IOS8_OR_LATER) {
         UIAlertController *alertController = [UIAlertController alertControllerWithTitle:@"请选择时间\n\n\n\n\n\n\n\n\n\n\n\n" message:nil preferredStyle:UIAlertControllerStyleActionSheet];
         UIAlertAction *cancleAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
-            [frm setDateFormat:@"YYYY-MM-dd"];
-            self.lb_birthday.text=[frm stringFromDate:dp.date];
+            NSString * birthday=[frm stringFromDate:dp.date];
+            NSArray * years=[birthday componentsSeparatedByString:@"-"];
+            NSString * year =[years firstObject];
+            NSDate * nowDate=[NSDate new];
+            NSString * nowYear =[frm stringFromDate:nowDate];
+            NSString * nowYears =[[nowYear componentsSeparatedByString:@"-"] firstObject];
+            
+            if (nowYears.integerValue- year.integerValue>18) {
+                self.lb_birthday.text=[frm stringFromDate:dp.date];
+            }else{
+                [MBProgressHUD showError:@"年龄不能小于18哦~" toView:self.view];
+            }
         }];
         [alertController.view addSubview:dp];
         [alertController addAction:cancleAction];
@@ -411,13 +458,23 @@
         [sheet addSubview:dp];
         [sheet showFromToolbar:self.navigationController.toolbar];
     }
-
 }
 -(void)datePickerValueChanged:(UIDatePicker*)sender WithGesture:(UITapGestureRecognizer*)gesture
 {
     NSDateFormatter * frm=[[NSDateFormatter alloc]init];
     [frm setDateFormat:@"YYYY-MM-dd"];
-    self.lb_birthday.text=[frm stringFromDate:sender.date];
+    
+    NSString * birthday=[frm stringFromDate:sender.date];
+    NSArray * years=[birthday componentsSeparatedByString:@"-"];
+    NSString * year =[years firstObject];
+    NSDate * nowDate=[NSDate new];
+    NSString * nowYear =[frm stringFromDate:nowDate];
+    NSString * nowYears =[[nowYear componentsSeparatedByString:@"-"] firstObject];
+    if (nowYears.integerValue- year.integerValue>18) {
+        self.lb_birthday.text=[frm stringFromDate:sender.date];
+    }else{
+        [MBProgressHUD showError:@"年龄不能小于18哦~" toView:self.view];
+    }
 }
 
 /**
@@ -433,9 +490,9 @@
 - (void)viewWillAppear:(BOOL)animated
 {
     [super viewWillAppear:animated];
-    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
-    [center addObserver:self selector:@selector(keyboardAppear:) name:UIKeyboardWillShowNotification object:nil];
-    [center addObserver:self selector:@selector(keyboardDisappear:) name:UIKeyboardWillHideNotification object:nil];
+//    NSNotificationCenter *center = [NSNotificationCenter defaultCenter];
+//    [center addObserver:self selector:@selector(keyboardAppear:) name:UIKeyboardWillShowNotification object:nil];
+//    [center addObserver:self selector:@selector(keyboardDisappear:) name:UIKeyboardWillHideNotification object:nil];
 }
 - (void)keyboardAppear:(NSNotification *)notification
 {

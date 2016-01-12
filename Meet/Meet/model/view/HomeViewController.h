@@ -7,6 +7,7 @@
 //
 
 #import "BaseViewController.h"
+#import "NearByViewController.h"
 
 @interface HomeViewController : BaseViewController
 

@@ -13,8 +13,10 @@
 #import "WFHudView.h"
 #import "ServerConfig.h"
 #import "BaseViewController.h"
+#import "NSString+URLEncode.h"
 
 #define kImageTag 9999
+#define videoHeight (self.videoBG.frame.size.height+5)
 
 
 @implementation YMTableViewCell
@@ -86,6 +88,13 @@
         [self.deleteButton setTitleColor:[UIColor lightGrayColor] forState:UIControlStateNormal];
         [self.deleteButton addTarget:self action:@selector(deletePost:) forControlEvents:UIControlEventTouchUpInside];
         [self.contentView addSubview:self.deleteButton];
+        
+        self.videoBG=[[UIView alloc]init];
+        self.videoBG.backgroundColor=[UIColor clearColor];
+        self.videoBG.userInteractionEnabled=YES;
+        UITapGestureRecognizer * playTap=[[UITapGestureRecognizer alloc]initWithTarget:self action:@selector(playVideo)];
+        [self.videoBG addGestureRecognizer:playTap];
+        [self.contentView addSubview:self.videoBG];
 //        _favourImage = [[UIImageView alloc] initWithFrame:CGRectZero];
 //        _favourImage.image = [UIImage imageNamed:@"zan.png"];
 //        [self.contentView addSubview:_favourImage];
@@ -220,20 +229,38 @@
         [_imageArray addObject:image];
          tap.appendArray = _imageArray;
     }
-    
+#pragma 视频部分
+    if (ymData.messageBody.videoUrl.length>0) {
+        self.videoBG.hidden=NO;
+         self.videoBG.frame=CGRectMake(65, TableHeader-35 + 10 + hhhh + kDistance + (ymData.islessLimit?0:30), screenWidth - offSet_X-5, 180);
+        //创建player
+        NSString *urlStr=ymData.messageBody.videoUrl;
+        urlStr =[urlStr stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
+        NSURL *url=[NSURL URLWithString:urlStr];
+        AVPlayerItem *playerItem=[AVPlayerItem playerItemWithURL:url];
+        self.player=[AVPlayer playerWithPlayerItem:playerItem];
+        //创建播放器层
+        AVPlayerLayer *playerLayer=[AVPlayerLayer playerLayerWithPlayer:self.player];
+        playerLayer.frame=CGRectMake(0, 0, self.videoBG.frame.size.width, self.videoBG.frame.size.height);
+        self.player.volume=0.0;
+        playerLayer.videoGravity=AVLayerVideoGravityResizeAspect;//视频填充模式
+        [self.videoBG.layer addSublayer:playerLayer];
+       
+        [self.player play];
+    }else{
+        self.videoBG.hidden=YES;
+        self.videoBG.frame=CGRectZero;
+        [self.player pause];
+    }
 #pragma mark - /////点赞部分
     //移除点赞view 避免滚动时内容重叠
     for ( int i = 0; i < _ymFavourArray.count; i ++) {
         WFTextView * imageV = (WFTextView *)[_ymFavourArray objectAtIndex:i];
         if (imageV.superview) {
             [imageV removeFromSuperview];
-            
         }
     }
-    
     [_ymFavourArray removeAllObjects];
-
-    
     float origin_Y = 10;
     NSUInteger scale_Y = ymData.showImageArray.count - 1;
     float balanceHeight = 0; //纯粹为了解决没图片高度的问题
@@ -241,7 +268,6 @@
         scale_Y = 0;
         balanceHeight = - ShowImage_H - kDistance ;
     }
-    
     float backView_Y = 0;
     float backView_H = 0;
     
@@ -281,7 +307,7 @@
     
     for (int i = 0; i < ymData.replyDataSource.count; i ++ ) {
         
-        WFTextView *_ilcoreText = [[WFTextView alloc] initWithFrame:CGRectMake(offSet_X+5,15 + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance + ymData.favourHeight + (ymData.favourHeight == 0?0:kReply_FavourDistance), screenWidth - offSet_X -15, 0)];
+        WFTextView *_ilcoreText = [[WFTextView alloc] initWithFrame:CGRectMake(offSet_X+5,15 + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance + ymData.favourHeight + (ymData.favourHeight == 0?0:kReply_FavourDistance)+videoHeight, screenWidth - offSet_X -15, 0)];
         
         if (i == 0) {
             backView_Y =20 + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30);
@@ -309,10 +335,10 @@
         
         [_ilcoreText setOldString:matchString andNewString:[ymData.completionReplySource objectAtIndex:i]];
         
-        _ilcoreText.frame = CGRectMake(offSet_X+5,15 + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance + ymData.favourHeight + (ymData.favourHeight == 0?0:kReply_FavourDistance), screenWidth - offSet_X -15, [_ilcoreText getTextHeight]);
+        _ilcoreText.frame = CGRectMake(offSet_X+5,15+videoHeight + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance + ymData.favourHeight + (ymData.favourHeight == 0?0:kReply_FavourDistance), screenWidth - offSet_X -15, [_ilcoreText getTextHeight]);
         [self.contentView addSubview:_ilcoreText];
        
-        origin_Y += [_ilcoreText getTextHeight] + 5 ;
+        origin_Y += [_ilcoreText getTextHeight] + 3 ;
         if (i==0) {
 //            origin_Y=0;
         }
@@ -322,51 +348,48 @@
         [_ymTextArray addObject:_ilcoreText];
     }
     
-    backView_H += (ymData.replyDataSource.count - 1)*5;
+    backView_H += (ymData.replyDataSource.count -1)*3;
     
     
     
     if (ymData.replyDataSource.count == 0) {//没回复的时候
         
-        replyImageView.frame = CGRectMake(offSet_X, backView_Y - 10 + balanceHeight + 5 + kReplyBtnDistance, 0, 0);
-        _replyBtn.frame = CGRectMake(screenWidth - 25 ,15 + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance - 24, 20, 20);
-        self.dateLabel.frame=CGRectMake(offSet_X ,15 + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance - 24, 80, 20);
+        replyImageView.frame = CGRectMake(offSet_X, backView_Y+videoHeight - 10 + balanceHeight + 5 + kReplyBtnDistance, 0, 0);
+        _replyBtn.frame = CGRectMake(screenWidth - 25 ,15+videoHeight + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance - 24, 20, 20);
+        self.dateLabel.frame=CGRectMake(offSet_X ,15+videoHeight + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance - 24, 80, 20);
         if ([ymData.messageBody.memberId integerValue]==[[ShareValue shareInstance].userInfo.id integerValue]) {
+             self.deleteButton.hidden=NO;
             self.deleteButton.tag=[ymData.messageBody.circleId integerValue];
-              self.deleteButton.frame=CGRectMake(offSet_X+80 ,15 + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance - 24, 40, 20);
+              self.deleteButton.frame=CGRectMake(offSet_X+80 ,15+videoHeight + 10 + ShowImage_H + (ShowImage_H + 10)*(scale_Y/3) + origin_Y + hhhh + kDistance + (ymData.islessLimit?0:30) + balanceHeight + kReplyBtnDistance - 24, 40, 20);
+        }else{
+             self.deleteButton.hidden=YES;
         }
       
     }else{
         
-        replyImageView.frame = CGRectMake(offSet_X, backView_Y - 10 + balanceHeight + 5 + kReplyBtnDistance, screenWidth - offSet_X -10, backView_H + 20 - 8);//微调
+        replyImageView.frame = CGRectMake(offSet_X, backView_Y+videoHeight - 10 + balanceHeight + 5 + kReplyBtnDistance, screenWidth - offSet_X -10, backView_H + 20 - 8);//微调
         
         _replyBtn.frame = CGRectMake(screenWidth - 5 - 20 , replyImageView.frame.origin.y - 24, 20, 20);
         self.dateLabel.frame= CGRectMake(offSet_X , replyImageView.frame.origin.y - 24, 80, 20);
         
         if ([ymData.messageBody.memberId integerValue]==[[ShareValue shareInstance].userInfo.id integerValue]) {
+             self.deleteButton.hidden=NO;
             self.deleteButton.tag=[ymData.messageBody.circleId integerValue];
             self.deleteButton.frame=CGRectMake(offSet_X+80 , replyImageView.frame.origin.y - 24, 40, 20);
+        }else{
+            self.deleteButton.hidden=YES;
         }
-        
     }
-    
-    
 }
-
 #pragma mark - ilcoreTextDelegate
 - (void)clickMyself:(NSString *)clickString{
-    
     //延迟调用下  可去掉 下同
     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2 * NSEC_PER_SEC));
     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
         
         UIAlertView *alert = [[UIAlertView alloc] initWithTitle:clickString message:nil delegate:nil cancelButtonTitle:@"好的" otherButtonTitles:nil, nil];
         [alert show];
-        
-        
     });
-    
-    
 }
 
 
@@ -378,6 +401,12 @@
 
 
 - (void)clickWFCoretext:(NSString *)clickString replyIndex:(NSInteger)index{
+    NSLog(@"clickString:%@",clickString);
+//    NSString * message =[NSString stringWithFormat:@"%@可能是一个电话号码，您是否需要拨打？",clickString];
+    if ([clickString isTelephone]) {
+        [self.delegate callWithNumber:clickString];
+        return;
+    }
     
     if ([clickString isEqualToString:@""]) {
        //reply
@@ -385,30 +414,23 @@
         [_delegate clickRichText:_stamp replyIndex:index];
     }else{
        //do nothing
-        [WFHudView showMsg:clickString inView:nil];
+//        [WFHudView showMsg:clickString inView:nil];
+        [_delegate clickReplyNickNameWithReplyIndex:index viewCell:self];
     }
     
 }
 
 #pragma mark - 点击action
 - (void)tapImageView:(YMTapGestureRecongnizer *)tapGes{
-//    
-//    NSArray * arr=tapGes.appendArray;
-//    NSMutableArray * ims=[NSMutableArray array];
-//    for (NSString * url in arr) {
-//        UIImageView * imageView=[[UIImageView alloc]init];
-//        [imageView sd_setImageWithURL:[NSURL URLWithString:url]];
-//        [ims addObject:imageView];
-//    }
-    
     [_delegate showImageViewWithImageViews:tapGes.appendArray byClickWhich:tapGes.view.tag];
-    
-    
 }
 -(void)clickPhoto{
     [_delegate clickPhotoIv:0 viewCell:self];
 }
 -(void)deletePost:(UIButton*)button{
     [self.delegate deletePostAtIndex:button.tag];
+}
+-(void)playVideo{
+    [self.delegate playVideoWithPlayer:self.player cell:self];
 }
 @end

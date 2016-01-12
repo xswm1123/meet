@@ -114,7 +114,7 @@
             _imagePicker.mediaTypes=@[(NSString *)kUTTypeMovie];
             _imagePicker.videoQuality=UIImagePickerControllerQualityType640x480;//wifi
             _imagePicker.cameraCaptureMode=UIImagePickerControllerCameraCaptureModeVideo;//设置摄像头模式（拍照，录制视频）
-            _imagePicker.videoMaximumDuration=60.0;
+            _imagePicker.videoMaximumDuration=300.0;
             _imagePicker.allowsEditing=YES;//允许编辑
         
         _imagePicker.delegate=self;//设置代理，检测操作

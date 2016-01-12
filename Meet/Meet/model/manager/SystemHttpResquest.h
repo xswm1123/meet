@@ -100,6 +100,7 @@
  *  获得用户上传的视频列表
  */
 @interface GetUserUploadedVideosListRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
 @property (nonatomic,strong) NSString * sortField;//排序（热门：viewCount,最新：created）
 @property (nonatomic,strong) NSString * pageNumber;//当前页，默认为1
 @property (nonatomic,strong) NSString * pageSize;//页大小，默认为10
@@ -165,7 +166,7 @@
 @property (nonatomic,assign) double lng;//经度
 @property (nonatomic,assign) double lat;//纬度
 @property (nonatomic,strong) NSString * pageNumber;//当前页，默认为1
-@property (nonatomic,strong) NSString * pageSize;//页大小，默认为20
+@property (nonatomic,assign) NSInteger pageSize;//页大小，默认为20
 @end
 /**
  *  获得商家类目
@@ -297,7 +298,7 @@
 @interface GetHomePageGiftsRequest : X_BaseHttpRequest
 @property (nonatomic,strong) NSString * memberId;//用户ID
 @property (nonatomic,strong) NSString * pageNumber;//当前页，默认为1
-@property (nonatomic,strong) NSString * pageSize;//页大小，默认为10
+@property (nonatomic,assign) NSInteger  pageSize;//页大小，默认为10
 @end
 /**
  *  发送好友请求
@@ -485,6 +486,7 @@
 @property (nonatomic,strong) NSString * memberId;//用户ID
 @property (nonatomic,assign) NSInteger gold;//金币数量
 @property (nonatomic,assign) NSInteger month;//充值月份
+@property (nonatomic,assign) NSInteger day;//体验天数
 @property (nonatomic,assign) double price;//支付金额
 @end
 /**
@@ -534,6 +536,7 @@
 @property (nonatomic,strong) NSString * memberId;//用户ID
 @property (nonatomic,strong) NSString * pageNumber;//当前页，默认为1
 @property (nonatomic,strong) NSString * pageSize;//页大小，默认为10
+@property (nonatomic,strong) NSString * targetId;//目标ID
 @end
 /**
  *  删除视频
@@ -610,6 +613,7 @@
 @property (nonatomic,strong) NSString * phone;//
 @property (nonatomic,strong) NSString * desc;//
 @property (nonatomic,strong) NSString * id;//
+@property (nonatomic,strong) NSString * storeId;
 @end
 /**
  *  获取最近来访
@@ -669,4 +673,108 @@
 @property (nonatomic,strong) NSString * content;//
 @property (nonatomic,strong) NSString * category;//
 @property (nonatomic,strong) NSString * type;//
+@end
+/**
+ *  获取最新的访客数
+ */
+@interface GetNearlyVisitCountRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property (nonatomic,strong) NSString * created;//
+@end
+/**
+ *  更新个推CID
+ */
+@interface UpdateGetuiCidRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property (nonatomic,strong) NSString * clientId;//CID
+@end
+/**
+ *  获得主页类目
+ */
+@interface GetIndexCategoryRequest : X_BaseHttpRequest
+
+@end
+/**
+ *  根据类目获取主页视频列表
+ */
+@interface GetIndexVideoListRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property (nonatomic,strong) NSString * sortField;//
+@property (nonatomic,strong) NSString * categoryId;//
+@property (nonatomic,strong) NSString * pageNumber;//
+@property (nonatomic,strong) NSString * pageSize;//
+@end
+/**
+ *  内购临时接口
+ */
+@interface IAPPurchaseRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property (nonatomic,strong) NSString * month;//
+@property (nonatomic,strong) NSString * gold;//
+@end
+/**
+ *  删除朋友圈评论
+ */
+@interface DeleteCircleCommentRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property (nonatomic,strong) NSString * commentId;//评论ID
+@end
+/**
+ *  第三方登录相关
+ */
+/**
+ *  是否登录了第三方
+ */
+@interface IsLoginReqeust : X_BaseHttpRequest
+@property(nonatomic,strong) NSString * openid;
+@property (nonatomic,strong) NSString * loginType;//(1、qq2、wechat)
+@end
+/**
+ *  注册第三方
+ */
+@interface RegisterExternRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * avatar;
+@property (nonatomic,strong) NSString * nickname;
+@property (nonatomic,strong) NSString * birthday;
+@property (nonatomic,strong) NSString * address;
+@property (nonatomic,strong) NSString * sex;
+@property (nonatomic,strong) NSString * openid;
+@property (nonatomic,strong) NSString * loginType;
+@end
+/**
+ *  绑定手机
+ */
+@interface BlindMobileRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property (nonatomic,strong) NSString * mobile;
+@property (nonatomic,strong) NSString * password;
+@property (nonatomic,strong) NSString * code;
+@end
+/**
+ *  绑定第三方
+ */
+@interface BlindExternRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property(nonatomic,strong) NSString * openid;
+@property (nonatomic,strong) NSString * loginType;//(1、qq2、wechat)
+@end
+/**
+ *  约吧
+ */
+@interface GetDatingDataRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@property (nonatomic,strong) NSString * pageNumber;//
+@property (nonatomic,assign) NSInteger  pageSize;//
+@end
+/**
+ *  发布约吧
+ */
+@interface PublishDatingRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
+@end
+/**
+ *  分享回调
+ */
+@interface ShareCallBackRequest : X_BaseHttpRequest
+@property (nonatomic,strong) NSString * memberId;//用户ID
 @end

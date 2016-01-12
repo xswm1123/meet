@@ -13,6 +13,8 @@
 #import "AppDelegate.h"
 #import "CustomerControlButton.h"
 #import "LeveyPopListView.h"
+#import "AFNetworking.h"
+#import "Reachability.h"
 #import "X_BaseAPI.h"
 #import "SystemAPI.h"
 #import "SystemHttpResquest.h"
@@ -35,6 +37,7 @@
 #import <AVFoundation/AVFoundation.h>
 #import "PECropViewController.h"
 #import "RootNavigationViewController.h"
+#import "NSString+URLEncode.h"
 //支付
 #import <AlipaySDK/AlipaySDK.h>
 #import "Order.h"
@@ -46,6 +49,7 @@
 #import "UMSocialWechatHandler.h"
 #import "UMSocialQQHandler.h"
 #import "UMSocialSinaHandler.h"
+#import "KeyboardManager.h"
 
 #define NUMBERS @"0123456789.\n"
 // production

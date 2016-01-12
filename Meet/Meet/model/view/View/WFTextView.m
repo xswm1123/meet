@@ -156,7 +156,6 @@
     
     return attrString;
 }
-
 // 通过表情名获得表情的图片
 - (UIImage *)getEmotionForKey:(NSString *)key{
     
