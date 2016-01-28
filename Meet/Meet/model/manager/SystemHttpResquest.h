@@ -488,6 +488,7 @@
 @property (nonatomic,assign) NSInteger month;//充值月份
 @property (nonatomic,assign) NSInteger day;//体验天数
 @property (nonatomic,assign) double price;//支付金额
+@property (nonatomic,assign) NSInteger vipPriceId;
 @end
 /**
  *  改变地理位置
@@ -777,4 +778,10 @@
  */
 @interface ShareCallBackRequest : X_BaseHttpRequest
 @property (nonatomic,strong) NSString * memberId;//用户ID
+@end
+/**
+ *  获取VIP套餐
+ */
+@interface GetVIPTypesRequest : X_BaseHttpRequest
+
 @end

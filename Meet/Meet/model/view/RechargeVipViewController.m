@@ -22,9 +22,10 @@
 @property (weak, nonatomic) IBOutlet UILabel *lb_type;
 @property (weak, nonatomic) IBOutlet UILabel *lb_icon;
 @property (nonatomic,assign) double money;
-@property (nonatomic,strong) NSArray * types;
+@property (nonatomic,strong) NSMutableArray * types;
 @property (nonatomic,assign) NSInteger golds;
 @property (nonatomic,assign) BOOL canUpdate;
+@property (nonatomic,assign) NSInteger  typeIndex;
 @end
 
 @implementation RechargeVipViewController
@@ -39,10 +40,34 @@
     //添加内支付监听
     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     [self initView];
+    self.typeIndex=0;
+    [self loadVIPTypes];
+}
+-(void)loadVIPTypes{
+    GetVIPTypesRequest * request =[[GetVIPTypesRequest alloc]init];
+    [SystemAPI GetVIPTypesRequest:request success:^(GetVIPTypesResponse *response) {
+        self.types=[NSMutableArray arrayWithArray:(NSArray*)response.data];
+        [self configData];
+    } fail:^(BOOL notReachable, NSString *desciption) {
+        
+    }];
+}
+-(void)configData{
+    //data
+    
+    self.lb_ID.text=[NSString stringWithFormat:@"%@",[ShareValue shareInstance].userInfo.meetid];
+    NSDictionary * dic =[self.types objectAtIndex:0];
+    self.money=[dic[@"price"] doubleValue];
+    self.golds=[dic[@"gold"] integerValue];
+    NSString * moneys=[NSString stringWithFormat:@"%.2f",self.money];
+    NSString * gold=[NSString stringWithFormat:@"%ld",(long)self.golds];
+    NSMutableAttributedString * mn=[[NSMutableAttributedString alloc]initWithString:[NSString stringWithFormat:@"%@元,赠送%@金币",moneys,gold]];
+    [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:22],NSForegroundColorAttributeName:iconYellow} range:NSMakeRange(0, moneys.length)];
+    [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:17],NSForegroundColorAttributeName:[UIColor whiteColor]} range:NSMakeRange(moneys.length,mn.length-moneys.length)];
+    self.lb_money.attributedText=mn;
+    self.lb_type.text=dic[@"description"];
 }
 -(void)initView{
-    self.types=@[@"3个月VIP",@"1个月VIP",@"一年VIP",@"黄金永久VIP",@"钻石永久VIP"];
-    self.lb_type.text=[self.types objectAtIndex:0];
     self.lb_icon.font=[UIFont fontWithName:iconFont size:18];
     self.lb_icon.text=@"\U0000e637";
     self.countBG.layer.cornerRadius=5;
@@ -67,16 +92,6 @@
     [we addAttributes:@{NSFontAttributeName:[UIFont fontWithName:iconFont size:36],NSForegroundColorAttributeName:iconBlue} range:NSMakeRange(0, weIcon.length)];
     [we addAttributes:@{NSFontAttributeName:[UIFont fontWithName:iconFont size:16],NSForegroundColorAttributeName:[UIColor whiteColor]} range:NSMakeRange(weIcon.length, weStr.length-weIcon.length)];
     [self.wePayBtn setAttributedTitle:we forState:UIControlStateNormal];
-    //data
-    self.lb_ID.text=[NSString stringWithFormat:@"%@",[ShareValue shareInstance].userInfo.meetid];
-    self.money=298;
-    self.golds=30000;
-    NSString * moneys=[NSString stringWithFormat:@"%.2f",self.money];
-    NSString * gold=[NSString stringWithFormat:@"%ld",(long)self.golds];
-    NSMutableAttributedString * mn=[[NSMutableAttributedString alloc]initWithString:[NSString stringWithFormat:@"%@元,赠送%@金币",moneys,gold]];
-    [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:22],NSForegroundColorAttributeName:iconYellow} range:NSMakeRange(0, moneys.length)];
-    [mn addAttributes:@{NSFontAttributeName:[UIFont systemFontOfSize:17],NSForegroundColorAttributeName:[UIColor whiteColor]} range:NSMakeRange(moneys.length,mn.length-moneys.length)];
-    self.lb_money.attributedText=mn;
 }
 -(void)setMoneyText:(double)money WithGold:(NSInteger)golds{
     NSString * moneys=[NSString stringWithFormat:@"%.2f",money];
@@ -92,44 +107,30 @@
         [al showInView:self.view.window];
         return;
     }
-    UIActionSheet * al=[[UIActionSheet alloc]initWithTitle:@"请选择充值套餐" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:@"3个月VIP",@"1个月VIP",@"一年VIP",@"黄金永久VIP",@"钻石永久VIP", nil];
+    
+    UIActionSheet * al=[[UIActionSheet alloc]initWithTitle:@"请选择充值套餐" delegate:self cancelButtonTitle:@"取消" destructiveButtonTitle:nil otherButtonTitles:nil, nil];
+    for (NSDictionary * dic in self.types) {
+        [al addButtonWithTitle:dic[@"description"]];
+    }
+    al.cancelButtonIndex=0;
     [al showInView:self.view.window];
 }
 -(void)actionSheet:(UIActionSheet *)actionSheet clickedButtonAtIndex:(NSInteger)buttonIndex{
-   
-    if (buttonIndex==0) {
-        self.lb_type.text=[self.types objectAtIndex:0];
-        self.money=298;
-        [self setMoneyText:298 WithGold:30000];
-    }
-    if (buttonIndex==1) {
-        if (![WXApi isWXAppInstalled]) {
-            return;
+    if (buttonIndex!=0) {
+        if (buttonIndex==1) {
+            if (![WXApi isWXAppInstalled]) {
+                return;
+            }
         }
-        self.lb_type.text=[self.types objectAtIndex:1];
-        self.money=198;
-        [self setMoneyText:198 WithGold:1000];
-    }
-    if (buttonIndex==2) {
-        if (![WXApi isWXAppInstalled]) {
-//            self.lb_type.text=[self.types objectAtIndex:1];
-//            self.money=498;
-//            [self setMoneyText:498 WithGold:50000];
-        }else{
-            self.lb_type.text=[self.types objectAtIndex:2];
-            self.money=498;
-            [self setMoneyText:498 WithGold:50000];
+        if (buttonIndex==2) {
+            if (![WXApi isWXAppInstalled]) {
+            }
         }
-    }
-    if (buttonIndex==3) {
-        self.lb_type.text=[self.types objectAtIndex:3];
-        self.money=1588;
-        [self setMoneyText:1588 WithGold:68888];
-    }
-    if (buttonIndex==4) {
-        self.lb_type.text=[self.types objectAtIndex:4];
-        self.money=9999;
-        [self setMoneyText:9999 WithGold:1428888];
+        NSDictionary * dic   =[self.types objectAtIndex:buttonIndex-1];
+        self.typeIndex=buttonIndex-1;
+        self.lb_type.text=dic[@"description"];
+        self.money=[dic[@"price"] doubleValue];
+        [self setMoneyText:[dic[@"price"] doubleValue] WithGold:[dic[@"gold"] integerValue]];
     }
 }
 - (IBAction)minsAction:(id)sender {
@@ -176,28 +177,11 @@
         CreatePayOrderRequest * request=[[CreatePayOrderRequest alloc]init];
         request.payType=2;
         request.tradeType=2;
-        if ([self.lb_type.text isEqualToString:@"3个月VIP"]) {
-             request.month=3;
-            request.gold=30000;
-        }
-        if ([self.lb_type.text isEqualToString:@"1个月VIP"]) {
-            request.month=1;
-            request.gold=1000;
-        }
-        if ([self.lb_type.text isEqualToString:@"一年VIP"]) {
-            request.month=12;
-            request.gold=50000;
-        }
-        if ([self.lb_type.text isEqualToString:@"黄金永久VIP"]) {
-            request.month=1;
-            request.gold=68888;
-        }
-        if ([self.lb_type.text isEqualToString:@"钻石永久VIP"]) {
-            request.month=12;
-            request.gold=1428888;
-        }
-        
-        request.price=self.money;
+        NSDictionary * dic =[self.types objectAtIndex:self.typeIndex];
+        request.vipPriceId=[dic[@"id"] integerValue];
+        request.month=[dic[@"month"] integerValue];
+        request.gold=[dic[@"gold"] integerValue];
+        request.price=[dic[@"price"] doubleValue];
         [SystemAPI CreatePayOrderRequest:request success:^(CreatePayOrderResponse *response) {
             NSDictionary * dic=response.data;
             NSString * tradeID=[NSString stringWithFormat:@"%@",[dic objectForKey:@"id"]];
@@ -213,27 +197,11 @@
         CreatePayOrderRequest * request=[[CreatePayOrderRequest alloc]init];
         request.payType=1;
         request.tradeType=2;
-        if ([self.lb_type.text isEqualToString:@"3个月VIP"]) {
-            request.month=3;
-            request.gold=30000;
-        }
-        if ([self.lb_type.text isEqualToString:@"1个月VIP"]) {
-            request.month=1;
-            request.gold=1000;
-        }
-        if ([self.lb_type.text isEqualToString:@"一年VIP"]) {
-            request.month=12;
-            request.gold=50000;
-        }
-        if ([self.lb_type.text isEqualToString:@"黄金永久VIP"]) {
-            request.month=1;
-            request.gold=68888;
-        }
-        if ([self.lb_type.text isEqualToString:@"钻石永久VIP"]) {
-            request.month=12;
-            request.gold=1428888;
-        }
-        request.price=self.money;
+        NSDictionary * dic =[self.types objectAtIndex:self.typeIndex];
+        request.vipPriceId=[dic[@"id"] integerValue];
+        request.month=[dic[@"month"] integerValue];
+        request.gold=[dic[@"gold"] integerValue];
+        request.price=[dic[@"price"] doubleValue];
         [SystemAPI CreatePayOrderRequest:request success:^(CreatePayOrderResponse *response) {
             NSDictionary * dic=response.data;
             NSString * tradeID=[NSString stringWithFormat:@"%@",[dic objectForKey:@"id"]];

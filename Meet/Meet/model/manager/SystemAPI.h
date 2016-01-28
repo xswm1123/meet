@@ -109,4 +109,8 @@
  *  分享回调
  */
 +(void)ShareCallBackRequest:(ShareCallBackRequest *)request success:(void(^)(ShareCallBackResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
+/**
+ *  获取VIP套餐
+ */
++(void)GetVIPTypesRequest:(GetVIPTypesRequest *)request success:(void(^)(GetVIPTypesResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail;
 @end

@@ -304,3 +304,6 @@
 @interface ShareCallBackResponse : X_BaseHttpResponse
 
 @end
+@interface GetVIPTypesResponse: X_BaseHttpResponse
+
+@end

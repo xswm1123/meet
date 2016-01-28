@@ -141,8 +141,9 @@
     manager.responseSerializer=[AFJSONResponseSerializer serializer];
     [ manager.requestSerializer setValue:@"new_version" forHTTPHeaderField:@"version"];
     [ manager.requestSerializer setValue:[X_BaseAPI enToekn] forHTTPHeaderField:@"token"];
+    NSString *encoded = [path stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];
     AFHTTPRequestOperation* op=
-    [manager GET:path parameters:tdict success:^(AFHTTPRequestOperation *operation, id responseObject) {
+    [manager GET:encoded parameters:tdict success:^(AFHTTPRequestOperation *operation, id responseObject) {
         NSDictionary *responseString = (NSDictionary *)responseObject;
         NSLog(@"responseString:%@",responseString);
             if (responseObject) {

@@ -806,3 +806,6 @@
     return self;
 }
 @end
+@implementation GetVIPTypesRequest
+
+@end

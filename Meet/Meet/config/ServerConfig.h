@@ -127,6 +127,7 @@
 #define GetGoldForEveryday @"xy/rest/find/inner/goldGetForEveryday"//每日领取金币
 #define GetGoldByOnlineTime @"xy/rest/find/inner/goldGetForOnlineTime"//在线时长领取金币
 //支付
+#define GetVIPTpyes @"xy/rest/common/inner/getVipPriceList"//获取VIP套餐
 #define CreatePayOrder @"xy/rest/pay/inner/addTradeOrder"//生成支付订单
 #define CreateWeChatPrePay @"xy/rest/pay/weixin_notify"//生成微支付预支付订单
 //个推

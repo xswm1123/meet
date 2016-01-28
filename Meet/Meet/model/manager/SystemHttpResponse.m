@@ -297,3 +297,6 @@
 @implementation ShareCallBackResponse
 
 @end
+@implementation GetVIPTypesResponse
+
+@end

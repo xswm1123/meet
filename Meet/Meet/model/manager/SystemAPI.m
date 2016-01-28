@@ -671,4 +671,11 @@
         fail(NotReachable,desciption);
     } class:[ShareCallBackResponse class]];
 }
++(void)GetVIPTypesRequest:(GetVIPTypesRequest *)request success:(void(^)(GetVIPTypesResponse *response))success fail:(void(^)(BOOL notReachable,NSString *desciption))fail{
+    [X_BaseAPI getHttpRequest:request apiPath:GetVIPTpyes Success:^(X_BaseHttpResponse *response) {
+        success((GetVIPTypesResponse *)response);
+    } fail:^(BOOL NotReachable, NSString *desciption) {
+        fail(NotReachable,desciption);
+    } class:[GetVIPTypesResponse class]];
+}
 @end
